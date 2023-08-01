@@ -1,3 +1,4 @@
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -8,15 +9,25 @@ import '/config/light_theme.dart';
 import 'config/dark_theme.dart';
 import 'providers/password_provider.dart';
 import 'utils/routes.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+
+  // Kiểm tra kết nối Firebase
+  if (Firebase.apps.isEmpty) {
+    print('Kết nối Firebase thất bại!');
+  } else {
+    print('Kết nối Firebase thành công!');
+  }
   runApp(const MyApp());
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     systemNavigationBarColor: Colors.transparent, // navigation bar color
     statusBarColor: Colors.transparent, // status bar color
   ));
 }
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
