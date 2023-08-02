@@ -1,28 +1,29 @@
 {
   "project_info": {
     "project_number": "131041000954",
+    "firebase_url": "https://hotelbooking-4633e-default-rtdb.asia-southeast1.firebasedatabase.app",
     "project_id": "hotelbooking-4633e",
     "storage_bucket": "hotelbooking-4633e.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:131041000954:android:c94167157c58d1d6463843",
+        "mobilesdk_app_id": "1:131041000954:android:c6cd829f5cabbc1b463843",
         "android_client_info": {
           "package_name": "com.example.hotel_booking_app"
         }
       },
       "oauth_client": [
         {
-          "client_id": "131041000954-bakd8e8c0jir48gok6ovjhg26kch945i.apps.googleusercontent.com",
+          "client_id": "131041000954-7hq4si7j2q46m7foriihhkst5gqquh5s.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.hotel_booking_app",
-            "certificate_hash": "617f82cb0541fd40ffccb0d4589db3b4339d5bca"
+            "certificate_hash": "9c1b87726dea312a7dd46f46eeb5078fd0111a2f"
           }
         },
         {
-          "client_id": "131041000954-ra2mdcpflhm0m4lhgoaa16bp9apb9kt0.apps.googleusercontent.com",
+          "client_id": "131041000954-qesl6dv5sfvjh47e1db7lehacbgmpngm.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -35,8 +36,15 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "131041000954-ra2mdcpflhm0m4lhgoaa16bp9apb9kt0.apps.googleusercontent.com",
+              "client_id": "131041000954-qesl6dv5sfvjh47e1db7lehacbgmpngm.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "131041000954-alj5qgg4f4cb2jl93r89fmtje1h0069f.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.hotelBookingApp"
+              }
             }
           ]
         }

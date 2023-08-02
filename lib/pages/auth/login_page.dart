@@ -1,3 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -7,6 +9,7 @@ import '../../providers/password_provider.dart';
 import '../../utils/routes.dart';
 import '/components/c_elevated_button.dart';
 import '/components/c_text_form_field.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -47,7 +50,7 @@ class _LoginPageState extends State<LoginPage> {
             height: 30.h,
           ),
           Text(
-            'Welcome to Homelyn',
+            'Welcome to Valcursa',
             style: Theme.of(context).textTheme.displayLarge,
           ),
           SizedBox(
@@ -170,31 +173,39 @@ class _LoginPageState extends State<LoginPage> {
           Row(
             children: [
               Expanded(
+                child: InkWell(
+                  onTap: () async {
+                    await handleSignInWithGoogle();
+
+                    setState(() {
+
+                    });
+                  },
                   child: Container(
-                padding: REdgeInsets.symmetric(vertical: 14.h),
-                decoration: BoxDecoration(
-                    boxShadow: kDefaultBoxShadow,
-                    color: Theme.of(context).inputDecorationTheme.fillColor,
-                    borderRadius: BorderRadius.all(Radius.circular(28.r))),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SvgPicture.asset('assets/svg/google_icon.svg'),
-                    SizedBox(
-                      width: 15.w,
+                    padding: REdgeInsets.symmetric(vertical: 14.h),
+                    decoration: BoxDecoration(
+                      boxShadow: kDefaultBoxShadow,
+                      color: Theme.of(context).inputDecorationTheme.fillColor,
+                      borderRadius: BorderRadius.all(Radius.circular(28.r)),
                     ),
-                    Text(
-                      'Google',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium!
-                          .copyWith(fontWeight: FontWeight.w500),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SvgPicture.asset('assets/svg/google_icon.svg'),
+                        SizedBox(
+                          width: 15.w,
+                        ),
+                        Text(
+                          'Google',
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium!
+                              .copyWith(fontWeight: FontWeight.w500),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              )),
-              SizedBox(
-                width: 27.w,
               ),
               Expanded(
                   child: Container(
@@ -251,4 +262,64 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
+
+  Future<UserCredential?> signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth?.accessToken,
+        idToken: googleAuth?.idToken,
+      );
+
+      return await FirebaseAuth.instance.signInWithCredential(credential);
+    } catch (e) {
+      print('Đăng nhập không thành công: $e');
+      return null;
+    }
+  }
+
+  Future<void> handleSignInWithGoogle() async {
+    try {
+      // Thực hiện đăng nhập bằng Google
+      UserCredential? userCredential = await signInWithGoogle();
+
+      // Kiểm tra xem đăng nhập có thành công hay không
+      if (userCredential != null) {
+        // Đăng nhập thành công
+        User? user = userCredential.user;
+        String? displayName = user?.displayName;
+        String? email = user?.email;
+
+        // Lưu dữ liệu vào Firebase Realtime Database
+        if (displayName != null && email != null) {
+          // ignore: deprecated_member_use
+          final databaseReference = FirebaseDatabase.instance.reference();
+
+          // Kiểm tra xem email đã tồn tại trong bảng "guests" chưa
+          DataSnapshot snapshot = (await databaseReference.child('guests').orderByChild('email').equalTo(email).once()).snapshot;
+
+          if (snapshot.value != null) {
+            // Nếu email đã tồn tại, báo đăng nhập thành công
+            print('Đăng nhập thành công.');
+          } else {
+            // Nếu email chưa tồn tại, tiến hành lưu tài khoản và thông báo đăng ký thành công
+            await databaseReference.child('guests').push().set({
+              'displayName': displayName,
+              'email': email,
+            });
+            print('Đăng nhập thành công và đã lưu dữ liệu trong Realtime Database.');
+          }
+        }
+      } else {
+        // Đăng nhập thất bại
+        print('Đăng nhập không thành công.');
+      }
+    } catch (e) {
+      // Xử lý lỗi nếu có
+      print('Đã xảy ra lỗi: $e');
+    }
+  }
+
 }
