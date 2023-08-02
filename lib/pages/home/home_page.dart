@@ -130,7 +130,7 @@ class _HomePageState extends State<HomePage> {
                   height: 30.h,
                 ),
                 Text(
-                  'Hello, Marrine!',
+                  'Hello, Marrine!', //Tên user
                   style: Theme.of(context)
                       .textTheme
                       .bodyLarge!

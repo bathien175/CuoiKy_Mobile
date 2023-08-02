@@ -23,7 +23,7 @@ class _SplashPageState extends State<SplashPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: SizedBox(child: Image.asset('assets/images/app_logo.png')),
+        child: SizedBox(child: Image.asset('assets/images/FullLogo_Vertical.png',scale: 1.5,)),
       ),
     );
   }

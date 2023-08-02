@@ -23,7 +23,7 @@ class WelcomePage extends StatelessWidget {
               height: 30.h,
             ),
             Text(
-              'Welcome to Hotelyn',
+              'Welcome to Valcursa',
               // ignore: deprecated_member_use
               style: Theme.of(context).textTheme.headline1,
             ),
@@ -31,7 +31,7 @@ class WelcomePage extends StatelessWidget {
               height: 15.h,
             ),
             Text(
-              'If you are new here please create your account first before book the hotel.',
+              'Nếu bạn là người mới, hãy tạo một tài khoản trước khi tiến hành đặt khách sạn.',
               style: Theme.of(context).textTheme.bodyLarge,
               textAlign: TextAlign.center,
             ),
@@ -39,7 +39,7 @@ class WelcomePage extends StatelessWidget {
               height: 134.h,
             ),
             CElevatedButton(
-                child: const Text('Create Account'),
+                child: const Text('Tạo tài khoản'),
                 onPressed: () {
                   Navigator.of(context).pushNamed(
                     RouteGenerator.registerPage,
@@ -55,7 +55,7 @@ class WelcomePage extends StatelessWidget {
                 );
               },
               child: Text(
-                'Login',
+                'Đăng nhập',
                 style: Theme.of(context)
                     .textTheme
                     .headlineSmall!
