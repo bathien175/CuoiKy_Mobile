@@ -22,7 +22,9 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  //update 2
   final _phoneController = TextEditingController();
+  final _phone2Controller = TextEditingController();
   final _passwordController = TextEditingController();
   void showToast(String ms){
     Fluttertoast.showToast(msg: ms, fontSize: 16, backgroundColor: Colors.black, textColor: Colors.white, gravity: ToastGravity.BOTTOM, toastLength: Toast.LENGTH_LONG);
