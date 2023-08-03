@@ -128,7 +128,7 @@ class RouteGenerator {
         return MaterialPageRoute(
             builder: (_) => const TransactionHistoryPage());
       case verifyAccountPage:
-        return MaterialPageRoute(builder: (_) => const VerifyAccountPage());
+       return MaterialPageRoute(builder: (_) => const VerifyAccountPage());
       case welcomePage:
         return MaterialPageRoute(builder: (_) => const WelcomePage());
 

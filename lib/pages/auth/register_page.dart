@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -10,13 +11,28 @@ import '/components/c_text_form_field.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
-
+  static String verify="";
+  static String phone = "";
+  static String password = "";
+  static String fullname="";
   @override
   State<RegisterPage> createState() => _RegisterPageState();
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  final _passwordController = TextEditingController();
+  final TextEditingController _fullNameController = TextEditingController();
+  final TextEditingController _phoneNumberController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  var phone = "";
+
+  // Loại bỏ số 0 ở đầu sđt người dùng nhập 0123 -> 123 để hệ thống gửi tin nhắn đến +84 123
+  String _removeLeadingZero(String phoneNumber) {
+    if (phoneNumber.startsWith('0')) {
+      return phoneNumber.substring(1);
+    }
+    return phoneNumber;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,7 +63,7 @@ class _RegisterPageState extends State<RegisterPage> {
             height: 30.h,
           ),
           Text(
-            'Welcome to Homelyn',
+            'Welcome to Valcursa',
             style: Theme.of(context).textTheme.displayLarge,
           ),
           SizedBox(
@@ -72,6 +88,7 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
           CTextFormField(
               hintText: 'Enter your username',
+              textControllor: _fullNameController,
               textInputAction: TextInputAction.next,
               keyboardType: TextInputType.name,
               prefixIcon: Theme.of(context).brightness == Brightness.light
@@ -95,9 +112,14 @@ class _RegisterPageState extends State<RegisterPage> {
             height: 10.h,
           ),
           CTextFormField(
-              hintText: 'Enter your number',
+              hintText: 'Enter your number (+84)',
+              textControllor: _phoneNumberController,
               textInputAction: TextInputAction.next,
               keyboardType: TextInputType.phone,
+              onChanged: (value){
+                String sanitizedPhone = _removeLeadingZero(value);
+                phone = sanitizedPhone;
+              },
               prefixIcon: Theme.of(context).brightness == Brightness.light
                   ? SvgPicture.asset(
                       'assets/svg/call_icon_light.svg',
@@ -158,11 +180,24 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
           CElevatedButton(
               child: const Text('Agree and Continue'),
-              onPressed: () {
-                Navigator.of(context).pushNamed(
-                  RouteGenerator.verifyAccountPage,
+              onPressed: () async{
+                RegisterPage.phone = phone;
+                RegisterPage.password = _passwordController.text;
+                RegisterPage.fullname = _fullNameController.text;
+                await FirebaseAuth.instance.verifyPhoneNumber(
+                  phoneNumber: '+84 $phone',
+                  verificationCompleted: (PhoneAuthCredential credential) {},
+                  verificationFailed: (FirebaseAuthException e) {},
+                  codeSent: (String verificationId, int? resendToken) {
+                    RegisterPage.verify=verificationId;
+                    Navigator.of(context).pushNamed(
+                      RouteGenerator.verifyAccountPage,
+                    );
+                  },
+                  codeAutoRetrievalTimeout: (String verificationId) {},
                 );
-              }),
+              }
+              ),
           SizedBox(
             height: 20.h,
           ),

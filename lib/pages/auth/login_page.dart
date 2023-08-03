@@ -1,8 +1,11 @@
+import 'dart:ffi';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import '../../config/constants.dart';
 import '../../providers/password_provider.dart';
@@ -19,7 +22,11 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
+  void showToast(String ms){
+    Fluttertoast.showToast(msg: ms, fontSize: 16, backgroundColor: Colors.black, textColor: Colors.white, gravity: ToastGravity.BOTTOM, toastLength: Toast.LENGTH_LONG);
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -75,6 +82,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
           CTextFormField(
               hintText: 'Enter your number',
+              textControllor: _phoneController,
               textInputAction: TextInputAction.next,
               keyboardType: TextInputType.phone,
               prefixIcon: Theme.of(context).brightness == Brightness.light
@@ -155,10 +163,11 @@ class _LoginPageState extends State<LoginPage> {
           CElevatedButton(
               child: const Text('Login'),
               onPressed: () {
-                Navigator.of(context).pushNamed(
-                  RouteGenerator.navigationPage,
-                );
-              }),
+                // Navigator.of(context).pushNamed(
+                //   RouteGenerator.navigationPage,
+                // );}
+                signInWithPhoneNumber();}
+              ),
           SizedBox(
             height: 20.h,
           ),
@@ -275,8 +284,47 @@ class _LoginPageState extends State<LoginPage> {
 
       return await FirebaseAuth.instance.signInWithCredential(credential);
     } catch (e) {
-      print('Đăng nhập không thành công: $e');
+      showToast("Đăng nhập không thành công");
       return null;
+    }
+  }
+  // Loại bỏ số 0 ở đầu sđt người dùng nhập 0123 -> 123 để hệ thống gửi tin nhắn đến +84 123
+  String _removeLeadingZero(String phoneNumber) {
+    if (phoneNumber.startsWith('0')) {
+      return phoneNumber.substring(1);
+    }
+    return phoneNumber;
+  }
+
+  Future<void> signInWithPhoneNumber() async {
+    String phone = "+84 ${_removeLeadingZero(_phoneController.text)}";
+    // ignore: deprecated_member_use
+    final databaseReference = FirebaseDatabase.instance.reference();
+    DataSnapshot snapshot = (await databaseReference.child('guests')
+        .orderByChild('phoneNumber')
+        .equalTo(phone)
+        .once()).snapshot;
+
+    Map<dynamic, dynamic>? usersData = snapshot.value as Map?;
+
+    if(usersData!=null){
+      //có tồn tài một số điện thoại
+      // Lọc kết quả theo điều kiện mật khẩu
+      Map<dynamic, dynamic> filteredUsers = {};
+      usersData.forEach((key, userData) {
+        if (userData['password'] == _passwordController.text) {
+          // Xử lý lấy dữ liệu người dùng
+
+          showToast("Đăng nhập thành công!");
+          Navigator.of(context).pushNamed(
+            RouteGenerator.navigationPage,
+          );
+        }else{
+          showToast("Sai mật khẩu!");
+        }
+      });
+    }else {
+      showToast("Tài khoản chưa được đăng ký!");
     }
   }
 
@@ -302,23 +350,31 @@ class _LoginPageState extends State<LoginPage> {
 
           if (snapshot.value != null) {
             // Nếu email đã tồn tại, báo đăng nhập thành công
-            print('Đăng nhập thành công.');
+            Fluttertoast.showToast(msg: "Đăng nhập thành công", toastLength: Toast.LENGTH_LONG, gravity: ToastGravity.BOTTOM, timeInSecForIosWeb: 1, textColor: Colors.black, fontSize: 16);
+            // ignore: use_build_context_synchronously
+            Navigator.of(context).pushNamed(
+              RouteGenerator.navigationPage,
+            );
           } else {
             // Nếu email chưa tồn tại, tiến hành lưu tài khoản và thông báo đăng ký thành công
             await databaseReference.child('guests').push().set({
               'displayName': displayName,
               'email': email,
             });
-            print('Đăng nhập thành công và đã lưu dữ liệu trong Realtime Database.');
+            Fluttertoast.showToast(msg: "Tạo tài khoản thành công", toastLength: Toast.LENGTH_LONG, gravity: ToastGravity.BOTTOM, timeInSecForIosWeb: 1, textColor: Colors.black, fontSize: 16);
+            // ignore: use_build_context_synchronously
+            Navigator.of(context).pushNamed(
+              RouteGenerator.navigationPage,
+            );
           }
         }
       } else {
         // Đăng nhập thất bại
-        print('Đăng nhập không thành công.');
+        showToast('Đăng nhập không thành công.');
       }
     } catch (e) {
       // Xử lý lỗi nếu có
-      print('Đã xảy ra lỗi: $e');
+      showToast('Đã xảy ra lỗi phía server');
     }
   }
 
