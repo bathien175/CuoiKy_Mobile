@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:homelyn/components/c_cupertino_switch.dart';
+import 'package:homelyn/models/current_user.dart';
+import 'package:homelyn/pages/auth/login_page.dart';
 
 import '../../config/constants.dart';
 import '../../utils/routes.dart';
+import '../welcome/welcome_page.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -277,6 +280,15 @@ class _SettingsPageState extends State<SettingsPage> {
                       color: Theme.of(context).inputDecorationTheme.fillColor,
                       borderRadius: BorderRadius.all(Radius.circular(15.r))),
                   child: ListTile(
+                    onTap: () {
+                      CURRENT_USER_ID = "";
+                      CURRENT_USER_NAME = "";
+                      CURRENT_USER_IMAGE = "";
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => const WelcomePage()),
+                      );
+                    },
                     contentPadding: REdgeInsets.all(0),
                     leading: SvgPicture.asset('assets/svg/logout_icon.svg'),
                     title: Text(

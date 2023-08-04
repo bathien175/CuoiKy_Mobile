@@ -1,5 +1,4 @@
-import 'dart:ffi';
-
+import 'package:homelyn/models/current_user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -22,9 +21,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  //update 2
   final _phoneController = TextEditingController();
-  final _phone2Controller = TextEditingController();
   final _passwordController = TextEditingController();
   void showToast(String ms){
     Fluttertoast.showToast(msg: ms, fontSize: 16, backgroundColor: Colors.black, textColor: Colors.white, gravity: ToastGravity.BOTTOM, toastLength: Toast.LENGTH_LONG);
@@ -302,6 +299,7 @@ class _LoginPageState extends State<LoginPage> {
     String phone = "+84 ${_removeLeadingZero(_phoneController.text)}";
     // ignore: deprecated_member_use
     final databaseReference = FirebaseDatabase.instance.reference();
+
     DataSnapshot snapshot = (await databaseReference.child('guests')
         .orderByChild('phoneNumber')
         .equalTo(phone)
@@ -318,6 +316,9 @@ class _LoginPageState extends State<LoginPage> {
           // Xử lý lấy dữ liệu người dùng
 
           showToast("Đăng nhập thành công!");
+          CURRENT_USER_ID = userData['uid'].toString();
+          CURRENT_USER_NAME = userData['fullname'].toString();
+          CURRENT_USER_IMAGE = userData['image'].toString();
           Navigator.of(context).pushNamed(
             RouteGenerator.navigationPage,
           );
@@ -353,6 +354,9 @@ class _LoginPageState extends State<LoginPage> {
           if (snapshot.value != null) {
             // Nếu email đã tồn tại, báo đăng nhập thành công
             Fluttertoast.showToast(msg: "Đăng nhập thành công", toastLength: Toast.LENGTH_LONG, gravity: ToastGravity.BOTTOM, timeInSecForIosWeb: 1, textColor: Colors.black, fontSize: 16);
+            CURRENT_USER_ID = userCredential.user!.uid;
+            CURRENT_USER_NAME = displayName;
+            CURRENT_USER_IMAGE = userCredential.user!.photoURL!;
             // ignore: use_build_context_synchronously
             Navigator.of(context).pushNamed(
               RouteGenerator.navigationPage,
@@ -360,14 +364,19 @@ class _LoginPageState extends State<LoginPage> {
           } else {
             // Nếu email chưa tồn tại, tiến hành lưu tài khoản và thông báo đăng ký thành công
             await databaseReference.child('guests').push().set({
-              'displayName': displayName,
+              'uid': userCredential.user!.uid,
+              'fullname': displayName,
               'email': email,
+              'image': userCredential.user!.photoURL
             });
             Fluttertoast.showToast(msg: "Tạo tài khoản thành công", toastLength: Toast.LENGTH_LONG, gravity: ToastGravity.BOTTOM, timeInSecForIosWeb: 1, textColor: Colors.black, fontSize: 16);
             // ignore: use_build_context_synchronously
             Navigator.of(context).pushNamed(
               RouteGenerator.navigationPage,
             );
+            CURRENT_USER_ID = userCredential.user!.uid;
+            CURRENT_USER_NAME = displayName;
+            CURRENT_USER_IMAGE = userCredential.user!.photoURL!;
           }
         }
       } else {
