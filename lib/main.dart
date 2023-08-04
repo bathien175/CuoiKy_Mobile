@@ -3,13 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:homelyn/config/light_theme.dart';
+import 'package:homelyn/models/post.dart';
 import 'package:homelyn/providers/confirm_password_provider.dart';
 import 'package:provider/provider.dart';
 import 'config/dark_theme.dart';
 import 'providers/password_provider.dart';
 import 'utils/routes.dart';
 
-Future<void> main() async{
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   //Khởi tạo firebase trước khi runapp
@@ -19,6 +20,7 @@ Future<void> main() async{
     statusBarColor: Colors.transparent, // status bar color
   ));
 }
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -34,6 +36,7 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(
             create: (_) => ConfirmPasswordProvider(),
           ),
+          ChangeNotifierProvider(create: (context) => Post())
         ],
         child: MaterialApp(
           theme: lightTheme,
