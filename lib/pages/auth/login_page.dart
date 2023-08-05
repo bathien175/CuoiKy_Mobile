@@ -270,7 +270,6 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
-
   Future<UserCredential?> signInWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
@@ -310,7 +309,6 @@ class _LoginPageState extends State<LoginPage> {
     if(usersData!=null){
       //có tồn tài một số điện thoại
       // Lọc kết quả theo điều kiện mật khẩu
-      Map<dynamic, dynamic> filteredUsers = {};
       usersData.forEach((key, userData) {
         if (userData['password'] == _passwordController.text) {
           // Xử lý lấy dữ liệu người dùng
