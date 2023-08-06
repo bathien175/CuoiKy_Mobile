@@ -5,7 +5,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:homelyn/config/constants.dart';
 import 'package:homelyn/models/current_user.dart';
 import '../../utils/routes.dart';
-import '../auth/login_page.dart';
 import '../welcome/welcome_page.dart';
 
 class ProfilePage extends StatefulWidget {

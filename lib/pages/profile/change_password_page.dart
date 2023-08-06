@@ -261,6 +261,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           'password': confirmPassword,
         });
         showToast('New password updated successfully!');
+        // ignore: use_build_context_synchronously
         Navigator.of(context).pushNamed(RouteGenerator.myProfilePage);
       } else {
         showToast('User ID is empty. Cannot update the password.');

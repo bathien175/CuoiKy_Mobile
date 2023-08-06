@@ -3,12 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:homelyn/components/c_elevated_button.dart';
-import 'package:homelyn/pages/profile/profile_page.dart';
 import 'package:homelyn/widgets/profile_badge.dart';
 import 'package:homelyn/models/current_user.dart';
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
-import 'package:image_picker/image_picker.dart';
 import '../../components/c_text_form_field.dart';
 import '../../components/c_text_form_field_readonly.dart';
 import '../../config/constants.dart';
@@ -231,7 +229,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
   }
 
   Future<String> _uploadImage(File imageFile) async {
-    String fileName = DateTime.now().toString() + '.png';
+    String fileName = '${DateTime.now()}.png';
     firebase_storage.Reference ref =
     firebase_storage.FirebaseStorage.instance.ref().child(fileName);
     await ref.putFile(imageFile);

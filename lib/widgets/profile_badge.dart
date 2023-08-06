@@ -2,12 +2,9 @@ import 'package:badges/badges.dart' as badge;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'dart:io';
 import 'package:image_picker/image_picker.dart';
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:homelyn/models/current_user.dart';
 
-import '../pages/profile/my_profile_page.dart';
 
 class ProfileBadge extends StatefulWidget {
   final Widget? child;
@@ -34,13 +31,6 @@ class _ProfileBadgeState extends State<ProfileBadge> {
 
 
   // Function to upload image to Firebase Storage
-  Future<String> _uploadImage(File imageFile) async {
-    String fileName = DateTime.now().toString() + '.png';
-    firebase_storage.Reference ref =
-    firebase_storage.FirebaseStorage.instance.ref().child(fileName);
-    await ref.putFile(imageFile);
-    return await ref.getDownloadURL();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,21 +40,21 @@ class _ProfileBadgeState extends State<ProfileBadge> {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: Text('Choose an option'),
+            title: const Text('Choose an option'),
             actions: [
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
                   _pickImage(ImageSource.camera);
                 },
-                child: Text('Take a photo'),
+                child: const Text('Take a photo'),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
                   _pickImage(ImageSource.gallery);
                 },
-                child: Text('Choose from gallery'),
+                child: const Text('Choose from gallery'),
               ),
             ],
           ),

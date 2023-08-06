@@ -8,18 +8,18 @@ class OnbordingContent {
 
 List<OnbordingContent> contents = [
   OnbordingContent(
-    title: 'Find Hundreds of Hotels',
+    title: 'Hotel Booking Apps',
     image: 'assets/images/onboarding_image1.png',
     discription: "Discover hundreds of hotels that spread across the world for you "
   ),
   OnbordingContent(
-    title: 'Make a Destination Plan',
+    title: 'Performed by group of 8',
     image: 'assets/images/onboarding_image2.png',
-    discription: "Choose the location and we have many hotel recommendations wherever you are "
+    discription: "As a final topic in the mobile cross-platform course"
   ),
   OnbordingContent(
-    title: 'Let’s Discover the World',
+    title: 'These are team members',
     image: 'assets/images/onboarding_image3.png',
-    discription: "Book your hotel right now for the next level travel. Enjoy your trip! "
+    discription: "Bá Thiện, Quang Huy, Tuấn Kiệt, Văn Trung, Tử Đang, Tiến Dũng"
   ),
 ];
