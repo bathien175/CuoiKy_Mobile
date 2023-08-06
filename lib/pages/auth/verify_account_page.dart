@@ -87,9 +87,11 @@ class _VerifyAccountPageState extends State<VerifyAccountPage> {
 
       // Save the user data under the "users" node using the UID as the key
       await databaseReference.child('guests').child(uid).set({
+        'uid': uid,
         'fullname': fullname,
         'phoneNumber': phoneNumber,
         'password': password,
+        'image': "https://www.kindpng.com/picc/m/22-223863_no-avatar-png-circle-transparent-png.png"
       });
     } catch (e) {
       showToast("Lỗi truy cập server");

@@ -1,11 +1,11 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:homelyn/config/constants.dart';
-
+import 'package:homelyn/models/current_user.dart';
 import '../../utils/routes.dart';
+import '../welcome/welcome_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -70,9 +70,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     InkWell(
                        onTap: (){
-               Navigator.of(context).pushNamed(
-                              RouteGenerator.settingsPage);
-            },
+                           Navigator.of(context).pushNamed(
+                                          RouteGenerator.settingsPage);
+                        },
                       child: Container(
                         padding: EdgeInsets.all(13.r),
                         decoration: BoxDecoration(
@@ -90,21 +90,30 @@ class _ProfilePageState extends State<ProfilePage> {
                 SizedBox(
                   height: 36.h,
                 ),
-                Image.asset('assets/images/profile_image2.png'),
+                // Image.asset('assets/images/profile_image2.png'),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(50), // Để bo tròn ảnh, thay 50 bằng giá trị bạn muốn
+                  child: Image.network(
+                    CURRENT_USER_IMAGE,
+                    width: 100, // Giới hạn chiều rộng của ảnh
+                    height: 100, // Giới hạn chiều cao của ảnh
+                    fit: BoxFit.cover, // Để điều chỉnh ảnh trong khu vực giới hạn
+                  ),
+                ),
                 SizedBox(
                   height: 15.h,
                 ),
                 Text(
-                  'Marrine Gustav',
+                  CURRENT_USER_NAME,
                   style: Theme.of(context).textTheme.displaySmall,
                 ),
-                SizedBox(
-                  height: 11.h,
-                ),
-                Text(
-                  'Purwokerto, Indonesia',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
+                // SizedBox(
+                //   height: 11.h,
+                // ),
+                // Text(
+                //   CURRENT_USER_ID,
+                //   style: Theme.of(context).textTheme.bodyLarge,
+                // ),
                 SizedBox(
                   height: 26.h,
                 ),
@@ -232,9 +241,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       borderRadius: BorderRadius.all(Radius.circular(15.r))),
                   child: ListTile(
                      onTap: (){
-               Navigator.of(context).pushNamed(
-                              RouteGenerator.transactionHistoryPage);
-            },
+                         Navigator.of(context).pushNamed(
+                                        RouteGenerator.transactionHistoryPage);
+                      },
                     contentPadding: REdgeInsets.all(0),
                     leading: Theme.of(context).brightness == Brightness.light
                         ? SvgPicture.asset('assets/svg/clock_light.svg')
@@ -291,6 +300,15 @@ class _ProfilePageState extends State<ProfilePage> {
                       color: Theme.of(context).inputDecorationTheme.fillColor,
                       borderRadius: BorderRadius.all(Radius.circular(15.r))),
                   child: ListTile(
+                    onTap: () {
+                      CURRENT_USER_ID = "";
+                      CURRENT_USER_NAME = "";
+                      CURRENT_USER_IMAGE = "";
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => const WelcomePage()),
+                      );
+                    },
                     contentPadding: REdgeInsets.all(0),
                     leading: SvgPicture.asset('assets/svg/logout_icon.svg'),
                     title: Text(

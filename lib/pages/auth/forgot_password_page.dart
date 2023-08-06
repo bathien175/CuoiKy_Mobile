@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:homelyn/models/current_user.dart';
 import 'package:homelyn/pages/auth/Verification_OTPcode_page.dart';
 import 'package:homelyn/pages/auth/register_page.dart';
 import '../../config/constants.dart';
@@ -43,22 +44,25 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           .once()).snapshot;
       Map<dynamic, dynamic>? usersData = snapshot.value as Map?;
       if(usersData!=null){
-      // Hiển thị thông báo yêu cầu đổi mật khẩu thành công
-        showToast("Số điện thoại trùng khớp!");
-        await FirebaseAuth.instance.verifyPhoneNumber(
-          phoneNumber: phone,
-          verificationCompleted: (PhoneAuthCredential credential) {},
+        usersData.forEach((key, value) async {
+          // Hiển thị thông báo yêu cầu đổi mật khẩu thành công
+          await FirebaseAuth.instance.verifyPhoneNumber(
+              phoneNumber: phone,
+              verificationCompleted: (PhoneAuthCredential credential) {},
           verificationFailed: (FirebaseAuthException e) {},
           codeSent: (String verificationId, int? resendToken) {
-            RegisterPage.verify=verificationId;
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => const VerificationOTPcodePage()
-              ),
-            );
+          RegisterPage.verify=verificationId;
+          CURRENT_USER_ID = value['uid'].toString();
+          showToast("Số điện thoại trùng khớp!");
+          Navigator.push(
+          context,
+          MaterialPageRoute(
+          builder: (context) => const VerificationOTPcodePage()
+          ),
+          );
           },
-          codeAutoRetrievalTimeout: (String verificationId) {},
+          codeAutoRetrievalTimeout: (String verificationId) {},);
+        }
         );
       } else{
         showToast("Số điện thoại không hợp lệ!");

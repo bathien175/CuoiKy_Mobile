@@ -1,3 +1,6 @@
+// ignore_for_file: empty_statements
+
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -5,10 +8,12 @@ import 'package:homelyn/providers/confirm_password_provider.dart';
 import 'package:homelyn/widgets/action_success_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 import '../../config/constants.dart';
+import '../../models/current_user.dart';
 import '../../providers/password_provider.dart';
 import '../../utils/routes.dart';
 import '/components/c_elevated_button.dart';
 import '/components/c_text_form_field.dart';
+import 'Verification_OTPcode_page.dart';
 
 class CreatePasswordPage extends StatefulWidget {
   const CreatePasswordPage({super.key});
@@ -18,7 +23,30 @@ class CreatePasswordPage extends StatefulWidget {
 }
 
 class _CreatePasswordPageState extends State<CreatePasswordPage> {
-  final _passwordController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
+
+  String? newPassword;
+  String? confirmPassword;
+
+  String? newPasswordError;
+  String? confirmPasswordError;
+
+  String? _validateNewPassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'New Password cannot be empty';
+    }
+    return null;
+  }
+
+  String? _validateConfirmPassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Confirm password cannot be empty';
+    }
+    return null;
+  }
+
 
   void _passwordChanged(BuildContext ctx) {
     showModalBottomSheet(
@@ -63,18 +91,6 @@ class _CreatePasswordPageState extends State<CreatePasswordPage> {
           onTap: () {
             Navigator.pop(context);
           },
-          child: Container(
-            margin: EdgeInsets.all(7.r),
-          
-            decoration: BoxDecoration(
-                 boxShadow: kDefaultBoxShadow,
-                color: Theme.of(context).inputDecorationTheme.fillColor,
-                shape: BoxShape.circle),
-            child: Icon(
-              Icons.arrow_back,
-              color: Theme.of(context).appBarTheme.iconTheme!.color,
-            ),
-          ),
         ),
       ),
       body: ListView(
@@ -149,7 +165,7 @@ class _CreatePasswordPageState extends State<CreatePasswordPage> {
           Consumer<ConfirmPasswordProvider>(
             builder: (context, pp, child) {
               return CTextFormField(
-                textControllor: _passwordController,
+                textControllor: _confirmPasswordController,
                 //..text = 'test421',
                 obscureText: pp.isObscure,
                 textInputAction: TextInputAction.done,
@@ -183,11 +199,38 @@ class _CreatePasswordPageState extends State<CreatePasswordPage> {
           ),
           CElevatedButton(
               child: const Text('Reset Password'),
-              onPressed: () {
-                _passwordChanged(context);
-              }),
+              onPressed: () async {
+                // Validate if 'Confirm new password' matches 'New password'
+                 if (_confirmPasswordController.text != _passwordController.text) {
+                    showToast('Password & Confirm Password don\'t match');}
+                 else{
+                   await _CreatePassword();
+              }}),
         ],
       ),
     );
   }
+
+  Future<void> _CreatePassword() async {
+    try {
+      final databaseReference = FirebaseDatabase.instance;
+      if (CURRENT_USER_ID.isNotEmpty) {
+        await databaseReference
+            .ref() // Sử dụng ref() để tham chiếu tới database.
+            .child('guests')
+            .child(CURRENT_USER_ID)
+            .update({
+          'password': _passwordController.text,
+        });
+        showToast('New password updated successfully!');
+        // ignore: use_build_context_synchronously
+        Navigator.of(context).pushNamed(RouteGenerator.loginPage);
+      } else {
+        showToast('User ID is empty. Cannot update the password.');
+      }
+    } catch (e) {
+      showToast('Error occurred while updating the password.: $e');
+    }
+  }
+
 }
