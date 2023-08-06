@@ -498,11 +498,12 @@ class _HomePageState extends State<HomePage> {
                         shrinkWrap: true,
                         scrollDirection: Axis.vertical,
                         physics: const BouncingScrollPhysics(),
-                        itemCount: 5,
+                        itemCount: hotels.length,
                         itemBuilder: (context, index) => InkWell(
                           //chuyển form detail cho hotel
                           onTap: () {
-                          Navigator.of(context).pushNamed(RouteGenerator.detailPage, arguments: hotels[index].hotel_id);
+                            CURRENT_HOTEL = hotels[index].hotel_id;
+                          Navigator.of(context).pushNamed(RouteGenerator.detailPage);
                           },
                           child: Container(
                           margin: REdgeInsets.only(bottom: 15.h),
@@ -537,10 +538,11 @@ class _HomePageState extends State<HomePage> {
                                   SizedBox(
                                     width: 4.w,
                                   ),
-                                  Text(hotels[index].hotel_address,
+                                  Text("${hotels[index].hotel_address.substring(0,35)}...",
                                     style: Theme.of(context).textTheme.bodyMedium,
                                     overflow: TextOverflow.ellipsis,
-                                    maxLines: 1,),
+                                    maxLines: 1
+                                  ),
                                   SizedBox(
                                     width: 8.w,
                                   ),

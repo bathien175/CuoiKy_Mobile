@@ -304,6 +304,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       CURRENT_USER_ID = "";
                       CURRENT_USER_NAME = "";
                       CURRENT_USER_IMAGE = "";
+                      CURRENT_USER_CITY = "";
+                      CURRENT_USER_ADDRESS = "";
+                      CURRENT_USER_EMAIL = "";
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (context) => const WelcomePage()),

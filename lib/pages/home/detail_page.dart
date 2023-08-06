@@ -173,7 +173,7 @@ class _DetailPageState extends State<DetailPage> {
                                 SizedBox(
                                   width: 8.w,
                                 ),
-                                Text(currentHotel.hotel_address,
+                                Text('${currentHotel.hotel_address.substring(0,40)}...',
                                     style: Theme.of(context).textTheme.bodyLarge,
                                 overflow: TextOverflow.ellipsis,
                                 maxLines: 1),
