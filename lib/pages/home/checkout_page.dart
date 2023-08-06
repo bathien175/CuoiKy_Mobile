@@ -75,7 +75,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   DateTimeRange dateTimeRange = DateTimeRange(
     start: DateTime.now(),
-    end: DateTime(2023, 07 , 30),
+    end: DateTime.now(),
   );
 
   @override

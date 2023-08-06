@@ -7,6 +7,7 @@ import 'package:homelyn/models/post.dart';
 import 'package:homelyn/providers/confirm_password_provider.dart';
 import 'package:provider/provider.dart';
 import 'config/dark_theme.dart';
+import 'providers/ThemeProvider.dart';
 import 'providers/password_provider.dart';
 import 'utils/routes.dart';
 
@@ -23,7 +24,6 @@ Future<void> main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
@@ -36,15 +36,21 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(
             create: (_) => ConfirmPasswordProvider(),
           ),
-          ChangeNotifierProvider(create: (context) => Post())
+          ChangeNotifierProvider(create: (context) => Post()),
+          ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ],
-        child: MaterialApp(
-          theme: lightTheme,
-          darkTheme: darkTheme,
-          themeMode: ThemeMode.system,
-          debugShowCheckedModeBanner: false,
-          initialRoute: RouteGenerator.splashPage,
-          onGenerateRoute: RouteGenerator.generateRoute,
+        child: Consumer<ThemeProvider>(
+          // Sử dụng Consumer để truy cập ThemeProvider
+          builder: (context, themeProvider, child) {
+            return MaterialApp(
+              theme: lightTheme,
+              darkTheme: darkTheme,
+              themeMode: themeProvider.themeMode,
+              debugShowCheckedModeBanner: false,
+              initialRoute: RouteGenerator.splashPage,
+              onGenerateRoute: RouteGenerator.generateRoute,
+            );
+          },
         ),
       ),
     );
