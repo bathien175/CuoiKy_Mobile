@@ -125,6 +125,8 @@ class _MyProfilePageState extends State<MyProfilePage> {
                   onChanged: (value) {
                     if (value.trim().isEmpty) {
                       _fullNameController.text = CURRENT_USER_NAME;
+                    } else {
+                      _fullNameController.text = value;
                     }
                   },
                 ),
@@ -194,7 +196,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
   }
 
   Future<void> _updateUserProfile() async {
-    String fullName = _fullNameController.text.trim();
+    String fullName = _fullNameController.text;
     if (fullName.isEmpty) {
       showToast('Please enter your full name.');
       return;
