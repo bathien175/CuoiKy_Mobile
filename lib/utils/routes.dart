@@ -75,7 +75,10 @@ class RouteGenerator {
       case checkoutPage:
         return MaterialPageRoute(builder: (_) => const CheckoutPage());
       case detailPage:
-        return MaterialPageRoute(builder: (_) => const DetailPage());
+        return MaterialPageRoute(
+            builder: (_) => DetailPage(
+                  hotelData: const {},
+                ));
       case forgotPasswordPage:
         return MaterialPageRoute(builder: (_) => const ForgotPasswordPage());
       case homePage:
@@ -128,7 +131,7 @@ class RouteGenerator {
         return MaterialPageRoute(
             builder: (_) => const TransactionHistoryPage());
       case verifyAccountPage:
-       return MaterialPageRoute(builder: (_) => const VerifyAccountPage());
+        return MaterialPageRoute(builder: (_) => const VerifyAccountPage());
       case welcomePage:
         return MaterialPageRoute(builder: (_) => const WelcomePage());
 
