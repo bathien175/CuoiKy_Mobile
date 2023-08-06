@@ -14,6 +14,7 @@ import 'package:homelyn/pages/messages/messages_empty_state_page.dart';
 import 'package:homelyn/pages/messages/messages_page.dart';
 import 'package:homelyn/pages/navigation/navigation_page.dart';
 import 'package:homelyn/pages/onboard/onbording_page.dart';
+import 'package:homelyn/pages/profile/change_password_page.dart';
 import 'package:homelyn/pages/profile/language_page.dart';
 import 'package:homelyn/pages/profile/my_cupon_page.dart';
 import 'package:homelyn/pages/profile/my_favourite_page.dart';
@@ -62,6 +63,7 @@ class RouteGenerator {
   static const String transactionHistoryPage = 'transactionHistoryPage';
   static const String verifyAccountPage = 'verifyAccountPage';
   static const String welcomePage = 'welcomePage';
+  static const String changePasswordPage = 'changePasswordPage';
   // static const String splash = '/';
 
   RouteGenerator._();
@@ -112,6 +114,8 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => const ProfilePage());
       case registerPage:
         return MaterialPageRoute(builder: (_) => const RegisterPage());
+      case changePasswordPage:
+        return MaterialPageRoute(builder: (_) => const ChangePasswordPage());
       case reviewsPage:
         return MaterialPageRoute(builder: (_) => const ReviewsPage());
       case searchTypingPage:

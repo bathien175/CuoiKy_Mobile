@@ -317,6 +317,7 @@ class _LoginPageState extends State<LoginPage> {
           CURRENT_USER_ID = userData['uid'].toString();
           CURRENT_USER_NAME = userData['fullname'].toString();
           CURRENT_USER_IMAGE = userData['image'].toString();
+          CURRENT_USER_PHONE = userData['phoneNumber'].toString();
           Navigator.of(context).pushNamed(
             RouteGenerator.navigationPage,
           );
@@ -375,6 +376,7 @@ class _LoginPageState extends State<LoginPage> {
             CURRENT_USER_ID = userCredential.user!.uid;
             CURRENT_USER_NAME = displayName;
             CURRENT_USER_IMAGE = userCredential.user!.photoURL!;
+            CURRENT_USER_EMAIL = email;
           }
         }
       } else {
