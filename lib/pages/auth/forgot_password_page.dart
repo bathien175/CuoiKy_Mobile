@@ -1,6 +1,13 @@
+// ignore_for_file: unused_local_variable, deprecated_member_use, unused_label
+
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:homelyn/pages/auth/Verification_OTPcode_page.dart';
+import 'package:homelyn/pages/auth/register_page.dart';
 import '../../config/constants.dart';
 import '../../utils/routes.dart';
 import '/components/c_elevated_button.dart';
@@ -12,8 +19,52 @@ class ForgotPasswordPage extends StatefulWidget {
   @override
   State<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
 }
-
+void showToast(String ms){
+  Fluttertoast.showToast(msg: ms, fontSize: 16, backgroundColor: Colors.black, textColor: Colors.white, gravity: ToastGravity.BOTTOM, toastLength: Toast.LENGTH_LONG);
+}
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController otpController = TextEditingController();
+  String verificationId = "";
+
+  String _removeLeadingZero(String phoneNumber) {
+    if (phoneNumber.startsWith('0')) {
+      return phoneNumber.substring(1);
+    }
+    return phoneNumber;
+  }
+
+  Future<void> resetPassword(BuildContext context) async {
+    String phone = "+84 ${_removeLeadingZero(phoneController.text)}"; // Định dạng số điện thoại theo chuẩn quốc tế
+    final databaseReference = FirebaseDatabase.instance.reference();
+    DataSnapshot snapshot = (await databaseReference.child('guests')
+          .orderByChild('phoneNumber')
+          .equalTo(phone)
+          .once()).snapshot;
+      Map<dynamic, dynamic>? usersData = snapshot.value as Map?;
+      if(usersData!=null){
+      // Hiển thị thông báo yêu cầu đổi mật khẩu thành công
+        showToast("Số điện thoại trùng khớp!");
+        await FirebaseAuth.instance.verifyPhoneNumber(
+          phoneNumber: phone,
+          verificationCompleted: (PhoneAuthCredential credential) {},
+          verificationFailed: (FirebaseAuthException e) {},
+          codeSent: (String verificationId, int? resendToken) {
+            RegisterPage.verify=verificationId;
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const VerificationOTPcodePage()
+              ),
+            );
+          },
+          codeAutoRetrievalTimeout: (String verificationId) {},
+        );
+      } else{
+        showToast("Số điện thoại không hợp lệ!");
+      }
+    }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,60 +87,30 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             ),
           ),
         ),
+        title: Text("Quên mật khẩu"),
       ),
-      body: ListView(
-        padding: REdgeInsets.symmetric(horizontal: 20.w),
-        children: [
-          SizedBox(
-            height: 30.h,
-          ),
-          Text(
-            'Forgot Password',
-            style: Theme.of(context).textTheme.displayLarge,
-          ),
-          SizedBox(
-            height: 12.h,
-          ),
-          Text(
-            'Enter the phone number, we’ll send the code',
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-          SizedBox(
-            height: 40.h,
-          ),
-          Text(
-            'Phone Number',
-            style: Theme.of(context)
-                .textTheme
-                .headlineMedium!
-                .copyWith(fontWeight: FontWeight.w500),
-          ),
-          SizedBox(
-            height: 10.h,
-          ),
-          CTextFormField(
-              hintText: 'Enter your number',
-              textInputAction: TextInputAction.next,
+      body:
+      Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            TextField(
+              controller: phoneController,
+              decoration: InputDecoration(labelText: "Số điện thoại"),
               keyboardType: TextInputType.phone,
-              prefixIcon: Theme.of(context).brightness == Brightness.light
-                  ? SvgPicture.asset(
-                      'assets/svg/call_icon_light.svg',
-                    )
-                  : SvgPicture.asset(
-                      'assets/svg/call_icon_dark.svg',
-                    )),
-          SizedBox(
-            height: 98.h,
-          ),
-          CElevatedButton(
-              child: const Text('Send Code'),
-              onPressed: () {
-                Navigator.of(context).pushNamed(
-                  RouteGenerator.createPasswordPage,
-                );
-              }),
-        ],
+            ),
+            SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: () => resetPassword(context),
+              child: Text("Yêu cầu đổi mật khẩu"),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
+
+
+

@@ -87,29 +87,9 @@ class _CreatePasswordPageState extends State<CreatePasswordPage> {
             'Create New Password',
             style: Theme.of(context).textTheme.displayLarge,
           ),
+
           SizedBox(
-            height: 12.h,
-          ),
-          Text.rich(
-            textAlign: TextAlign.left,
-            TextSpan(
-              children: [
-                TextSpan(
-                  text: 'We’ve send verification code to ',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                TextSpan(
-                  text: '+62 1283972849',
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyLarge!
-                      .copyWith(color: const Color(0xFF3D5BF6)),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(
-            height: 40.h,
+            height: 30.h,
           ),
           Text(
             'Password',

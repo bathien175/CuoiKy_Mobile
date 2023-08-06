@@ -1,6 +1,10 @@
+// ignore_for_file: unused_import, duplicate_import
+
 import 'package:flutter/material.dart';
+import 'package:homelyn/pages/auth/Verification_OTPcode_page.dart';
 import 'package:homelyn/pages/auth/create_password_page.dart';
 import 'package:homelyn/pages/auth/forgot_password_page.dart';
+import 'package:homelyn/pages/auth/Verification_OTPcode_page.dart';
 import 'package:homelyn/pages/auth/login_page.dart';
 import 'package:homelyn/pages/auth/verify_account_page.dart';
 import 'package:homelyn/pages/home/checkout_page.dart';
@@ -33,6 +37,7 @@ import '../pages/home/home_page.dart';
 class RouteGenerator {
   static const String splashPage = '/';
   static const String createPasswordPage = 'createPasswordPage';
+  static const String verificationOtpcodePage = 'verificationOtpcodePage';
   static const String checkoutPage = 'checkoutPage';
   static const String detailPage = 'detailPage';
   static const String forgotPasswordPage = 'forgotPasswordPage';
@@ -70,6 +75,8 @@ class RouteGenerator {
     switch (settings.name) {
       case splashPage:
         return MaterialPageRoute(builder: (_) => const SplashPage());
+      case verificationOtpcodePage:
+        return MaterialPageRoute(builder: (_) => const VerificationOTPcodePage());
       case createPasswordPage:
         return MaterialPageRoute(builder: (_) => const CreatePasswordPage());
       case checkoutPage:
