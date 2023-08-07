@@ -43,7 +43,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           shape: BoxShape.circle),
                       child: InkWell(
                         onTap: () {
-                          Navigator.pop(context);
+                          Navigator.of(context).pushNamed(RouteGenerator.profilePage);
                         },
                         child: Icon(
                           Icons.arrow_back,

@@ -1,13 +1,10 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:homelyn/config/constants.dart';
 import 'package:homelyn/models/current_user.dart';
-
 import '../../utils/routes.dart';
-import '../auth/login_page.dart';
 import '../welcome/welcome_page.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -73,9 +70,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     InkWell(
                        onTap: (){
-               Navigator.of(context).pushNamed(
-                              RouteGenerator.settingsPage);
-            },
+                           Navigator.of(context).pushNamed(
+                                          RouteGenerator.settingsPage);
+                        },
                       child: Container(
                         padding: EdgeInsets.all(13.r),
                         decoration: BoxDecoration(
@@ -110,13 +107,13 @@ class _ProfilePageState extends State<ProfilePage> {
                   CURRENT_USER_NAME,
                   style: Theme.of(context).textTheme.displaySmall,
                 ),
-                SizedBox(
-                  height: 11.h,
-                ),
-                Text(
-                  CURRENT_USER_ID,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
+                // SizedBox(
+                //   height: 11.h,
+                // ),
+                // Text(
+                //   CURRENT_USER_ID,
+                //   style: Theme.of(context).textTheme.bodyLarge,
+                // ),
                 SizedBox(
                   height: 26.h,
                 ),
@@ -244,9 +241,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       borderRadius: BorderRadius.all(Radius.circular(15.r))),
                   child: ListTile(
                      onTap: (){
-               Navigator.of(context).pushNamed(
-                              RouteGenerator.transactionHistoryPage);
-            },
+                         Navigator.of(context).pushNamed(
+                                        RouteGenerator.transactionHistoryPage);
+                      },
                     contentPadding: REdgeInsets.all(0),
                     leading: Theme.of(context).brightness == Brightness.light
                         ? SvgPicture.asset('assets/svg/clock_light.svg')

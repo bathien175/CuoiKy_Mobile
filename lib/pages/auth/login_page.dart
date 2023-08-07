@@ -317,6 +317,9 @@ class _LoginPageState extends State<LoginPage> {
           CURRENT_USER_ID = userData['uid'].toString();
           CURRENT_USER_NAME = userData['fullname'].toString();
           CURRENT_USER_IMAGE = userData['image'].toString();
+          CURRENT_USER_PHONE = userData['phoneNumber'].toString();
+          CURRENT_USER_CITY = userData['city'].toString();
+          CURRENT_USER_ADDRESS = userData['address'].toString();
           Navigator.of(context).pushNamed(
             RouteGenerator.navigationPage,
           );
@@ -352,9 +355,14 @@ class _LoginPageState extends State<LoginPage> {
           if (snapshot.value != null) {
             // Nếu email đã tồn tại, báo đăng nhập thành công
             Fluttertoast.showToast(msg: "Đăng nhập thành công", toastLength: Toast.LENGTH_LONG, gravity: ToastGravity.BOTTOM, timeInSecForIosWeb: 1, textColor: Colors.black, fontSize: 16);
+            Map<dynamic, dynamic>? usersData = snapshot.value as Map?;
             CURRENT_USER_ID = userCredential.user!.uid;
             CURRENT_USER_NAME = displayName;
             CURRENT_USER_IMAGE = userCredential.user!.photoURL!;
+            usersData!.forEach((key, value) {
+              CURRENT_USER_CITY = value['city'].toString();
+              CURRENT_USER_ADDRESS = value['address'].toString();
+            });
             // ignore: use_build_context_synchronously
             Navigator.of(context).pushNamed(
               RouteGenerator.navigationPage,
@@ -375,6 +383,7 @@ class _LoginPageState extends State<LoginPage> {
             CURRENT_USER_ID = userCredential.user!.uid;
             CURRENT_USER_NAME = displayName;
             CURRENT_USER_IMAGE = userCredential.user!.photoURL!;
+            CURRENT_USER_EMAIL = email;
           }
         }
       } else {
