@@ -1,13 +1,18 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:homelyn/components/search_text_field.dart';
 import 'package:homelyn/config/constants.dart';
 import 'package:homelyn/widgets/notifications_badge.dart';
-
+import 'package:google_maps_flutter_android/google_maps_flutter_android.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import '../../utils/routes.dart';
 
 class HomePage extends StatefulWidget {
@@ -85,15 +90,26 @@ class _HomePageState extends State<HomePage> {
                           SizedBox(
                             width: 10.w,
                           ),
-                          Text(
-                            'Purwokerto, IND',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge!
-                                .copyWith(fontWeight: FontWeight.w500),
+                          // ...existing code.
+                          TextButton(
+                            onPressed: () {
+                              // Navigate to the second screen when the button is clicked
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => MyLocationScreen()),
+                              );
+                            },
+                            child: Text('Click Me'), // Replace 'Click Me' with the text you want for the button
                           ),
+                          // Text(
+                          //   'Purwokerto, IND',
+                          //   style: Theme.of(context)
+                          //       .textTheme
+                          //       .titleLarge!
+                          //       .copyWith(fontWeight: FontWeight.w500),
+                          // ),
                           SizedBox(
-                            width: 20.w,
+                            width: 10.w,
                           ),
                           const Icon(
                             Icons.keyboard_arrow_down,
@@ -508,4 +524,159 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+}
+
+// class MyLocationScreen extends StatefulWidget {
+//   @override
+//   _MyLocationScreenState createState() => _MyLocationScreenState();
+// }
+//
+// class _MyLocationScreenState extends State<MyLocationScreen> {
+//   String _currentAddress = 'Fetching address...';
+//
+//   @override
+//   void initState() {
+//     super.initState();
+//     _getCurrentLocation();
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text('My Location'),
+//       ),
+//       body: Center(
+//         child: Text(_currentAddress),
+//       ),
+//     );
+//   }
+//
+//   Future<void> _getCurrentLocation() async {
+//     try {
+//       Position position = await Geolocator.getCurrentPosition(
+//         desiredAccuracy: LocationAccuracy.high,
+//       );
+//
+//       List<Placemark> placemarks = await placemarkFromCoordinates(
+//         position.latitude,
+//         position.longitude,
+//       );
+//
+//       if (placemarks.isNotEmpty) {
+//         Placemark placemark = placemarks.first;
+//         String address = "${placemark.name}, ${placemark.locality}, ${placemark.country}";
+//         setState(() {
+//           _currentAddress = address;
+//         });
+//       }
+//     } catch (e) {
+//       print(e);
+//       setState(() {
+//         _currentAddress = 'Error getting location';
+//       });
+//     }
+//   }
+// }
+//
+// void main() {
+//   runApp(MaterialApp(
+//     home: MyLocationScreen(),
+//   ));
+// }
+
+
+class MyLocationScreen extends StatefulWidget {
+  @override
+  _MyLocationScreenState createState() => _MyLocationScreenState();
+}
+
+class _MyLocationScreenState extends State<MyLocationScreen> {
+  String _currentAddress = 'Fetching address...';
+  LatLng _currentLatLng = LatLng(37.7749, -122.4194); // Default location (San Francisco)
+  GoogleMapController? _mapController;
+
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentLocation();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('My Location'),
+      ),
+      body: Stack(
+        children: [
+          GoogleMap(
+            initialCameraPosition: CameraPosition(
+              target: _currentLatLng,
+              zoom: 15.0,
+            ),
+            markers: {
+              Marker(
+                markerId: MarkerId('current_location_marker'),
+                position: _currentLatLng,
+                infoWindow: InfoWindow(title: 'Current Location', snippet: _currentAddress),
+              ),
+            },
+            onMapCreated: (controller) {
+              setState(() {
+                _mapController = controller;
+              });
+            },
+          ),
+          Positioned(
+            bottom: 16.0,
+            left: 16.0,
+            child: Container(
+              padding: EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: Text(_currentAddress),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _getCurrentLocation() async {
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      if (placemarks.isNotEmpty) {
+        Placemark placemark = placemarks.first;
+        String address = "${placemark.name}, ${placemark.locality}, ${placemark.country}";
+        LatLng latLng = LatLng(position.latitude, position.longitude);
+        setState(() {
+          _currentAddress = address;
+          _currentLatLng = latLng;
+        });
+        _mapController?.animateCamera(CameraUpdate.newLatLng(_currentLatLng));
+      }
+    } catch (e) {
+      print(e);
+      setState(() {
+        _currentAddress = 'Error getting location';
+      });
+    }
+  }
+}
+
+void main() {
+  runApp(MaterialApp(
+    home: MyLocationScreen(),
+  ));
 }

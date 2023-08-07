@@ -2,11 +2,13 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:homelyn/components/c_elevated_button.dart';
 
 import '../../config/constants.dart';
 import '../../utils/routes.dart';
+
 
 class DetailPage extends StatefulWidget {
   const DetailPage({super.key});
@@ -17,6 +19,11 @@ class DetailPage extends StatefulWidget {
 
 class _DetailPageState extends State<DetailPage> {
   final CarouselController _controller = CarouselController();
+ bool ischecktrue = false;
+  void showToast(String ms){
+    Fluttertoast.showToast(msg: ms, fontSize: 16, backgroundColor: Colors.black, textColor: Colors.white, gravity: ToastGravity.BOTTOM, toastLength: Toast.LENGTH_LONG);
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -88,10 +95,17 @@ class _DetailPageState extends State<DetailPage> {
                                       shape: BoxShape.circle),
                                   child: InkWell(
                                       onTap: () {
-                                        Navigator.pop(context);
+                                        setState(() {
+                                          ischecktrue = !ischecktrue;
+                                          // showPopup(context);
+                                          showToast("Thich thành công");
+                                        });
+
                                       },
-                                      child: SvgPicture.asset(
-                                          'assets/svg/favourite_icon_dark.svg')),
+                                    child: ischecktrue
+                                        ? SvgPicture.asset('assets/svg/favourite_icon_light.svg') // Show checkmark icon
+                                        : SvgPicture.asset('assets/svg/favourite_icon_dark.svg'),
+                                  ),
                                 ),
                               ],
                             )
@@ -525,4 +539,28 @@ class _DetailPageState extends State<DetailPage> {
       ),
     );
   }
+
+  void showPopup(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Thông báo'),
+          content: const Text('Bạn vừa thả tim thành công.'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('kiểm tra danh sách lượt thích'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+
+
 }
