@@ -173,10 +173,8 @@ class _DetailPageState extends State<DetailPage> {
                                 SizedBox(
                                   width: 8.w,
                                 ),
-                                Text('${currentHotel.hotel_address.substring(0,40)}...',
-                                    style: Theme.of(context).textTheme.bodyLarge,
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1),
+                                Text(subStringAddress(currentHotel.hotel_address),
+                                    style: Theme.of(context).textTheme.bodyLarge,),
                               ],
                             ),
                             const SizedBox(height: 10,),
@@ -579,6 +577,14 @@ class _DetailPageState extends State<DetailPage> {
       ));
     });
       return listHotel[0];
+  }
+
+  String subStringAddress(String address){
+    if(address.length>40){
+      return '${address.substring(0,40)}...';
+    }else{
+      return address;
+    }
   }
 
   String formatCurrencyVND(double amount) {

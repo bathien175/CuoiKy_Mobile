@@ -1,6 +1,5 @@
 // ignore_for_file: non_constant_identifier_names
 
-import 'dart:ffi';
 
 class Hotel {
   String hotel_id;
