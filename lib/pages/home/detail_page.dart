@@ -1,5 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -8,8 +9,9 @@ import 'package:homelyn/components/c_elevated_button.dart';
 import 'package:intl/intl.dart';
 
 import '../../config/constants.dart';
-import '../../models/current_user.dart';
+import '../../models/current_hotel.dart';
 import '../../models/model_hotel.dart';
+import '../../models/model_rating.dart';
 import '../../utils/routes.dart';
 
 class DetailPage extends StatefulWidget {
@@ -21,6 +23,7 @@ class DetailPage extends StatefulWidget {
 
 class _DetailPageState extends State<DetailPage> {
   final CarouselController _controller = CarouselController();
+  bool showFullDescription = false;
   late Future<Hotel> _currentHotel;
 
   @override
@@ -193,11 +196,11 @@ class _DetailPageState extends State<DetailPage> {
                                   TextSpan(
                                     children: [
                                       TextSpan(
-                                        text: '${currentHotel.hotel_rating} ',
+                                        text: '${currentHotel.hotel_rating.toDouble()} ',
                                         style: Theme.of(context).textTheme.titleLarge,
                                       ),
                                       TextSpan(
-                                        text: '(0 Reviews)',
+                                        text: '(${currentHotel.count_rating} Reviews)',
                                         style: Theme.of(context).textTheme.bodyLarge,
                                       ),
                                     ],
@@ -238,13 +241,31 @@ class _DetailPageState extends State<DetailPage> {
                             children: [
                               TextSpan(
                                 text:
-                                currentHotel.hotel_description,
+                                showFullDescription
+                                    ? currentHotel.hotel_description
+                                    : currentHotel.hotel_description.substring(
+                                    0, 100), // Chỉ hiển thị 100 ký tự đầu tiên
                                 style: Theme.of(context).textTheme.bodyLarge,
                               ),
-                              TextSpan(
-                                text: '  Read More',
-                                style: Theme.of(context).textTheme.titleSmall,
-                              ),
+                              if (!showFullDescription)
+                                TextSpan(
+                                  text: '  ...Read More',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleSmall
+                                      ?.copyWith(
+                                    color: Colors
+                                        .blue, // Màu xanh dương cho phần Read More
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      setState(() {
+                                        showFullDescription =
+                                        true; // Cập nhật biến showFullDescription khi nhấn vào "Read More"
+                                      });
+                                    },
+                                ),
                             ],
                           ),
                         ),
@@ -401,7 +422,7 @@ class _DetailPageState extends State<DetailPage> {
                                           width: 8.w,
                                         ),
                                         Text(
-                                            'Haight Streetm Purwokerto, Karang Lewas',
+                                            subStringAddress(CURRENT_HOTEL_ADDRESS),
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .bodyLarge),
@@ -450,60 +471,75 @@ class _DetailPageState extends State<DetailPage> {
                         SizedBox(
                           height: 20.h,
                         ),
-                        ListView.builder(
-                          shrinkWrap: true,
-                          scrollDirection: Axis.vertical,
-                          physics: const BouncingScrollPhysics(),
-                          itemCount: 5,
-                          padding: REdgeInsets.all(0),
-                          itemBuilder: (context, index) => Column(
-                            children: [
-                              ListTile(
-                                contentPadding: REdgeInsets.all(0),
-                                leading: Container(
-                                  decoration:
-                                  const BoxDecoration(shape: BoxShape.circle),
-                                  child: Image.asset(
-                                    'assets/images/notification_image.png',
-                                    fit: BoxFit.fill,
-                                  ),
-                                ),
-                                title: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'Kim Borrdy',
-                                      style: Theme.of(context).textTheme.headlineSmall,
-                                    ),
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.star,
-                                          color: kYellowColor,
-                                          size: 13.r,
+                        FutureBuilder<List<RatingHotel>>(
+                          future: getListComment(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return const CircularProgressIndicator(); // Hiển thị tiến trình đang chờ dữ liệu
+                            } else if (snapshot.hasError) {
+                              return const Text('Đã xảy ra lỗi'); // Hiển thị lỗi nếu có
+                            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                              return const Text('Không có dữ liệu'); // Hiển thị nếu không có dữ liệu
+                            } else {
+                              final commentList = snapshot.data!;
+                              return ListView.builder(
+                                shrinkWrap: true,
+                                scrollDirection: Axis.vertical,
+                                physics: const BouncingScrollPhysics(),
+                                itemCount: getCountList(commentList.length), // Số lượng phần tử trong danh sách đánh giá
+                                padding: REdgeInsets.all(0),
+                                itemBuilder: (context, index) {
+                                  final comment = commentList[index]; // Lấy đánh giá tương ứng với chỉ số index
+                                  return Column(
+                                    children: [
+                                      ListTile(
+                                        contentPadding: REdgeInsets.all(0),
+                                        leading: Container(
+                                          decoration: const BoxDecoration(shape: BoxShape.circle),
+                                          child: Image.network(
+                                            comment.user_image, // Đặt đường dẫn ảnh người dùng từ đánh giá
+                                            fit: BoxFit.fill,
+                                          ),
                                         ),
-                                        SizedBox(
-                                          width: 5.w,
+                                        title: Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              comment.user_name, // Lấy tên người dùng từ đánh giá
+                                              style: Theme.of(context).textTheme.headlineSmall,
+                                            ),
+                                            Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.star,
+                                                  color: kYellowColor,
+                                                  size: 13.r,
+                                                ),
+                                                SizedBox(
+                                                  width: 5.w,
+                                                ),
+                                                Text(
+                                                  comment.rating.toString(), // Lấy rating từ đánh giá
+                                                  style: Theme.of(context).textTheme.titleLarge,
+                                                ),
+                                              ],
+                                            ),
+                                          ],
                                         ),
-                                        Text(
-                                          '4.5',
-                                          style:
-                                          Theme.of(context).textTheme.titleLarge,
+                                        subtitle: Text(
+                                          comment.comment, // Lấy bình luận từ đánh giá
+                                          style: Theme.of(context).textTheme.bodyMedium,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                subtitle: Text(
-                                  'Amazing! The room is good than the picture. Thanks for amazing experience!',
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              const Divider(),
-                            ],
-                          ),
+                                      ),
+                                      const Divider(),
+                                    ],
+                                  );
+                                },
+                              );
+                            }
+                          },
                         )
                       ],
                     ),
@@ -572,13 +608,40 @@ class _DetailPageState extends State<DetailPage> {
         hotel_id: value['hotel_id'].toString(),
         hotel_image: value['hotel_image'].toString(),
         hotel_name: value['hotel_name'].toString(),
-        hotel_rating: value['hotel_rating'],
+        hotel_rating: value['hotel_rating'].toDouble(),
+        count_rating: value['count_rating'],
         hotel_price: value['hotel_price'],
       ));
     });
       return listHotel[0];
   }
 
+  Future<List<RatingHotel>> getListComment() async {
+    List<RatingHotel> listH = <RatingHotel>[];
+    // ignore: deprecated_member_use
+    final databaseReference = FirebaseDatabase.instance.reference();
+    // Kiểm tra xem email đã tồn tại trong bảng "guests" chưa
+    DataSnapshot snapshot = (await databaseReference.child('Reviews').orderByChild('hotel_id').equalTo(CURRENT_HOTEL).once()).snapshot;
+    Map<dynamic, dynamic>? hotelData = snapshot.value as Map?;
+    if(hotelData!=null){
+      hotelData.forEach((key, value) {
+        listH.add(RatingHotel(iid: value['iid'],
+            user_name: value['user_name'],
+            comment: value['review'],
+            rating: value['rating'],
+            user_image: value['user_image']));
+      });
+    }
+    return listH;
+  }
+
+  int getCountList(int countl){
+    if(countl>5){
+      return 5;
+    }else{
+      return countl;
+    }
+  }
   String subStringAddress(String address){
     if(address.length>40){
       return '${address.substring(0,40)}...';

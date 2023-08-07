@@ -9,6 +9,7 @@ import 'package:homelyn/config/constants.dart';
 import 'package:homelyn/models/current_user.dart';
 import 'package:homelyn/widgets/notifications_badge.dart';
 import 'package:intl/intl.dart';
+import '../../models/current_hotel.dart';
 import '../../models/model_hotel.dart';
 import '../../utils/routes.dart';
 
@@ -21,7 +22,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   TextEditingController textControllor = TextEditingController();
-
+  List<String> listFind = [];
   @override
   void initState() {
     super.initState();
@@ -32,30 +33,30 @@ class _HomePageState extends State<HomePage> {
     log("text field: ${textControllor.text}");
   }
 
-  // @override
-  // void dispose() {
-  //   // Clean up the controller when the widget is removed from the
-  //   // widget tree.
-  //   textControllor.dispose();
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is removed from the
+    // widget tree.
+    textControllor.dispose();
 
-  //   super.dispose();
-  // }
+    super.dispose();
+  }
 
   // mocking a future
   Future<List> fetchSimpleData() async {
-    //await Future.delayed(const Duration(milliseconds: 2000));
     // ignore: no_leading_underscores_for_local_identifiers
     List _list = <dynamic>[];
     // create a list from the text input of three items
     // to mock a list of items from an http call
-    _list.add('Test' ' Item 1');
-    _list.add('yes' ' welcome');
-    _list.add('Test' ' Item 3');
+    for(var item in listFind){
+      _list.add(item);
+    }
     return _list;
   }
 
   // mocking a future
   Future<List<Hotel>> fetchDataRecomment() async {
+    listFind.clear();
     // ignore: deprecated_member_use
     final databaseReference = FirebaseDatabase.instance.reference();
     DataSnapshot snapshot = (await databaseReference.child('hotels').once()).snapshot;
@@ -63,13 +64,15 @@ class _HomePageState extends State<HomePage> {
     Map<dynamic, dynamic>? hotelData = snapshot.value as Map?;
     if(hotelData != null){
       hotelData.forEach((key, item) {
+        listFind.add( item['hotel_id']+': '+item['hotel_name']);
         hotels.add(
           Hotel(
             hotel_id: item['hotel_id'],
             hotel_name: item['hotel_name'],
             hotel_address: item['hotel_address'],
             hotel_city: item['hotel_city'],
-            hotel_rating: item['hotel_rating'],
+            hotel_rating: item['hotel_rating'].toDouble(),
+              count_rating: item['count_rating'],
             hotel_price: item['hotel_price'],
             hotel_image: item['hotel_image'],
               hotel_description: item['hotel_description']
@@ -96,7 +99,8 @@ class _HomePageState extends State<HomePage> {
             hotel_name: item['hotel_name'],
             hotel_address: item['hotel_address'],
             hotel_city: item['hotel_city'],
-            hotel_rating: item['hotel_rating'],
+            hotel_rating: item['hotel_rating'].toDouble(),
+            count_rating: item['count_rating'],
             hotel_price: item['hotel_price'],
             hotel_image: item['hotel_image'],
             hotel_description: item['hotel_description']
@@ -267,6 +271,14 @@ class _HomePageState extends State<HomePage> {
                         //chuyển form detail cho hotel
                         onTap: () {
                           CURRENT_HOTEL = hotels[index].hotel_id;
+                          CURRENT_HOTEL_NAME = hotels[index].hotel_name;
+                          CURRENT_HOTEL_ADDRESS = hotels[index].hotel_address;
+                          CURRENT_HOTEL_DESCRIPTION = hotels[index].hotel_description;
+                          CURRENT_HOTEL_IMAGE = hotels[index].hotel_image;
+                          CURRENT_HOTEL_CITY = hotels[index].hotel_city;
+                          CURRENT_HOTEL_PRICE = hotels[index].hotel_price;
+                          CURRENT_HOTEL_RATING = hotels[index].hotel_rating.toDouble();
+                          CURRENT_HOTEL_COUNT_RATING = hotels[index].count_rating;
                           Navigator.of(context).pushNamed(RouteGenerator.detailPage);
                         },
                         child: Container(
@@ -503,6 +515,14 @@ class _HomePageState extends State<HomePage> {
                           //chuyển form detail cho hotel
                           onTap: () {
                             CURRENT_HOTEL = hotels[index].hotel_id;
+                            CURRENT_HOTEL_NAME = hotels[index].hotel_name;
+                            CURRENT_HOTEL_ADDRESS = hotels[index].hotel_address;
+                            CURRENT_HOTEL_DESCRIPTION = hotels[index].hotel_description;
+                            CURRENT_HOTEL_IMAGE = hotels[index].hotel_image;
+                            CURRENT_HOTEL_CITY = hotels[index].hotel_city;
+                            CURRENT_HOTEL_PRICE = hotels[index].hotel_price;
+                            CURRENT_HOTEL_RATING = hotels[index].hotel_rating.toDouble();
+                            CURRENT_HOTEL_COUNT_RATING = hotels[index].count_rating;
                           Navigator.of(context).pushNamed(RouteGenerator.detailPage);
                           },
                           child: Container(
@@ -569,7 +589,7 @@ class _HomePageState extends State<HomePage> {
                                         ),
                                       ),
                                       SizedBox(
-                                        width: 21.w,
+                                        width: 10.w,
                                       ),
                                       Row(
                                         children: [
@@ -579,7 +599,7 @@ class _HomePageState extends State<HomePage> {
                                             size: 16.r,
                                           ),
                                           SizedBox(
-                                            width: 5.w,
+                                            width: 2.w,
                                           ),
                                           Text.rich(
                                             textAlign: TextAlign.left,
@@ -592,7 +612,7 @@ class _HomePageState extends State<HomePage> {
                                                       .titleLarge,
                                                 ),
                                                 TextSpan(
-                                                    text: '0 Reviews)',
+                                                    text: '(${hotels[index].count_rating} Reviews)',
                                                     style: Theme.of(context)
                                                         .textTheme
                                                         .bodyMedium),
