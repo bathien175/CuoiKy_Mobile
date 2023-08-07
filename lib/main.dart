@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:homelyn/config/light_theme.dart';
-import 'package:homelyn/models/post.dart';
+
 import 'package:homelyn/providers/confirm_password_provider.dart';
+import 'package:homelyn/providers/postProvider.dart';
 import 'package:provider/provider.dart';
 import 'config/dark_theme.dart';
 import 'providers/ThemeProvider.dart';
@@ -36,7 +37,7 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(
             create: (_) => ConfirmPasswordProvider(),
           ),
-          ChangeNotifierProvider(create: (context) => Post()),
+          ChangeNotifierProvider(create: (_) => PostProvider()),
           ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ],
         child: Consumer<ThemeProvider>(

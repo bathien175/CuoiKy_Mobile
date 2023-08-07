@@ -67,4 +67,3 @@ List<City> vietnamCities = [
   City(name: "Bạc Liêu", id: 95),
   City(name: "Cà Mau", id: 96),
 ];
-
