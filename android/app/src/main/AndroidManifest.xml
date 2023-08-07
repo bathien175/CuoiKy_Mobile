@@ -2,7 +2,9 @@
     package="com.example.hotel_booking_app">
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
-   <application
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <application
         android:label="Valcursa"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">

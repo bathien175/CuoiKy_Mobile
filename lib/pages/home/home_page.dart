@@ -1,15 +1,18 @@
+import 'dart:async';
 import 'dart:developer';
-import 'package:firebase_database/firebase_database.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:homelyn/components/search_text_field.dart';
 import 'package:homelyn/config/constants.dart';
-import 'package:homelyn/models/current_user.dart';
 import 'package:homelyn/widgets/notifications_badge.dart';
-import 'package:intl/intl.dart';
-import '../../models/model_hotel.dart';
+import 'package:google_maps_flutter_android/google_maps_flutter_android.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import '../../utils/routes.dart';
 
 class HomePage extends StatefulWidget {
@@ -43,7 +46,7 @@ class _HomePageState extends State<HomePage> {
 
   // mocking a future
   Future<List> fetchSimpleData() async {
-    //await Future.delayed(const Duration(milliseconds: 2000));
+    await Future.delayed(const Duration(milliseconds: 2000));
     // ignore: no_leading_underscores_for_local_identifiers
     List _list = <dynamic>[];
     // create a list from the text input of three items
@@ -54,60 +57,6 @@ class _HomePageState extends State<HomePage> {
     return _list;
   }
 
-  // mocking a future
-  Future<List<Hotel>> fetchDataRecomment() async {
-    // ignore: deprecated_member_use
-    final databaseReference = FirebaseDatabase.instance.reference();
-    DataSnapshot snapshot = (await databaseReference.child('hotels').once()).snapshot;
-    List<Hotel> hotels = [];
-    Map<dynamic, dynamic>? hotelData = snapshot.value as Map?;
-    if(hotelData != null){
-      hotelData.forEach((key, item) {
-        hotels.add(
-          Hotel(
-            hotel_id: item['hotel_id'],
-            hotel_name: item['hotel_name'],
-            hotel_address: item['hotel_address'],
-            hotel_city: item['hotel_city'],
-            hotel_rating: item['hotel_rating'],
-            hotel_price: item['hotel_price'],
-            hotel_image: item['hotel_image'],
-              hotel_description: item['hotel_description']
-          ),
-        );
-      });
-    }
-    return hotels;
-  }
-
-
-  // mocking a future
-  Future<List<Hotel>> fetchDataNearby() async {
-    // ignore: deprecated_member_use
-    final databaseReference = FirebaseDatabase.instance.reference();
-    DataSnapshot snapshot = (await databaseReference.child('hotels').orderByChild('hotel_city').equalTo(CURRENT_USER_CITY).once()).snapshot;
-    List<Hotel> hotels = [];
-    Map<dynamic, dynamic>? hotelData = snapshot.value as Map?;
-    if(hotelData != null){
-      hotelData.forEach((key, item) {
-        hotels.add(
-          Hotel(
-            hotel_id: item['hotel_id'],
-            hotel_name: item['hotel_name'],
-            hotel_address: item['hotel_address'],
-            hotel_city: item['hotel_city'],
-            hotel_rating: item['hotel_rating'],
-            hotel_price: item['hotel_price'],
-            hotel_image: item['hotel_image'],
-            hotel_description: item['hotel_description']
-          ),
-        );
-      });
-    }
-    return hotels;
-  }
-  
-  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -141,15 +90,26 @@ class _HomePageState extends State<HomePage> {
                           SizedBox(
                             width: 10.w,
                           ),
-                          Text(
-                            'Purwokerto, IND',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge!
-                                .copyWith(fontWeight: FontWeight.w500),
+                          // ...existing code.
+                          TextButton(
+                            onPressed: () {
+                              // Navigate to the second screen when the button is clicked
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => MyLocationScreen()),
+                              );
+                            },
+                            child: Text('Click Me'), // Replace 'Click Me' with the text you want for the button
                           ),
+                          // Text(
+                          //   'Purwokerto, IND',
+                          //   style: Theme.of(context)
+                          //       .textTheme
+                          //       .titleLarge!
+                          //       .copyWith(fontWeight: FontWeight.w500),
+                          // ),
                           SizedBox(
-                            width: 20.w,
+                            width: 10.w,
                           ),
                           const Icon(
                             Icons.keyboard_arrow_down,
@@ -186,7 +146,7 @@ class _HomePageState extends State<HomePage> {
                   height: 30.h,
                 ),
                 Text(
-                  'Hello, $CURRENT_USER_NAME!', //Tên user
+                  'Hello, Marrine!', //Tên user
                   style: Theme.of(context)
                       .textTheme
                       .bodyLarge!
@@ -242,215 +202,188 @@ class _HomePageState extends State<HomePage> {
             padding: REdgeInsets.only(left: 24.w),
             child: SizedBox(
               height: 240.h,
-              child: FutureBuilder<List<Hotel>>(
-                future: fetchDataRecomment(),
-                builder: (BuildContext context, AsyncSnapshot<List<Hotel>> snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  } else if (snapshot.hasError) {
-                    return Center(
-                      child: Text('Error: ${snapshot.error}'),
-                    );
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(
-                      child: Text('No data available.'),
-                    );
-                  } else {
-                    List<Hotel> hotels = snapshot.data!;
-                    return ListView.builder(
-                      shrinkWrap: true,
-                      scrollDirection: Axis.horizontal,
-                      itemCount: 6,
-                      itemBuilder: (context, index) => InkWell(
-                        //chuyển form detail cho hotel
-                        onTap: () {
-                          CURRENT_HOTEL = hotels[index].hotel_id;
-                          Navigator.of(context).pushNamed(RouteGenerator.detailPage);
-                        },
-                        child: Container(
-                          width: 240.w,
-                          margin: REdgeInsets.only(right: 15.w),
-                          padding: REdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                              boxShadow: kDefaultBoxShadow,
-                              color: Theme.of(context).inputDecorationTheme.fillColor,
-                              borderRadius: BorderRadius.all(Radius.circular(15.r))),
-                          child: Column(
-                            // crossAxisAlignment: CrossAxisAlignment.start,
+              child: ListView.builder(
+                shrinkWrap: true,
+                scrollDirection: Axis.horizontal,
+                itemCount: 5,
+                itemBuilder: (context, index) => InkWell(
+                  onTap: () {
+                    Navigator.of(context).pushNamed(RouteGenerator.detailPage);
+                  },
+                  child: Container(
+                    width: 240.w,
+                    margin: REdgeInsets.only(right: 15.w),
+                    padding: REdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                        boxShadow: kDefaultBoxShadow,
+                        color: Theme.of(context).inputDecorationTheme.fillColor,
+                        borderRadius: BorderRadius.all(Radius.circular(15.r))),
+                    child: Column(
+                      // crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          height: 100.h,
+                          width: 228.w,
+                          child: Stack(
                             children: [
-                              SizedBox(
-                                height: 100.h,
-                                width: 228.w,
-                                child: Stack(
-                                  children: [
-                                    Positioned(
-                                        child: ClipRRect(
-                                          borderRadius:
-                                          BorderRadius.all(Radius.circular(10.r)),
-                                          child: Image.network(
-                                            hotels[index].hotel_image,
-                                            height: 100.h,
-                                            width: double.infinity,
-                                            fit: BoxFit.fill,
-                                          ),
-                                        )),
-                                    Positioned(
-                                        top: 6.h,
-                                        right: 6.w,
-                                        child: Container(
-                                          padding: REdgeInsets.symmetric(
-                                              horizontal: 12.w, vertical: 6.h),
-                                          decoration: BoxDecoration(
-                                              color: const Color.fromRGBO(
-                                                  21, 27, 51, 0.2),
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(60.r))),
-                                          child: Text.rich(
-                                            textAlign: TextAlign.left,
-                                            TextSpan(
-                                              children: [
-                                                TextSpan(
-                                                  text: formatCurrencyVND(hotels[index].hotel_price.toDouble()),
-                                                  style: GoogleFonts.dmSans(
-                                                    fontSize: 12.sp,
-                                                    fontWeight: FontWeight.w700,
-                                                    color: const Color(0xFFFFFFFF),
-                                                  ),
-                                                ),
-                                                TextSpan(
-                                                  text: '/Night',
-                                                  style: GoogleFonts.montserrat(
-                                                    fontSize: 12.sp,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: const Color(0xFFE2E4EA),
-                                                  ),
-                                                ),
-                                              ],
+                              Positioned(
+                                  child: ClipRRect(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(10.r)),
+                                child: Image.asset(
+                                  'assets/images/hotel_image.png',
+                                  height: 100.h,
+                                  width: double.infinity,
+                                  fit: BoxFit.fill,
+                                ),
+                              )),
+                              Positioned(
+                                  top: 6.h,
+                                  right: 6.w,
+                                  child: Container(
+                                    padding: REdgeInsets.symmetric(
+                                        horizontal: 12.w, vertical: 6.h),
+                                    decoration: BoxDecoration(
+                                        color: const Color.fromRGBO(
+                                            21, 27, 51, 0.2),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(60.r))),
+                                    child: Text.rich(
+                                      textAlign: TextAlign.left,
+                                      TextSpan(
+                                        children: [
+                                          TextSpan(
+                                            text: '\$46',
+                                            style: GoogleFonts.dmSans(
+                                              fontSize: 12.sp,
+                                              fontWeight: FontWeight.w700,
+                                              color: const Color(0xFFFFFFFF),
                                             ),
                                           ),
-                                        ))
-                                  ],
-                                ),
+                                          TextSpan(
+                                            text: '/Night',
+                                            style: GoogleFonts.montserrat(
+                                              fontSize: 12.sp,
+                                              fontWeight: FontWeight.w500,
+                                              color: const Color(0xFFE2E4EA),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ))
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: 14.h,
+                        ),
+                        RPadding(
+                          padding: REdgeInsets.symmetric(horizontal: 6.w),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Diamond Heart Hotel',
+                                style: Theme.of(context).textTheme.headlineSmall,
+                              ),
+                              SizedBox(
+                                height: 4.h,
+                              ),
+                              Text(
+                                'Purwokerto, Street No 31, Central Java',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                              SizedBox(
+                                height: 10.h,
+                              ),
+                              Divider(
+                                height: 1.h,
+                                thickness: 1,
+                                color: Theme.of(context).brightness ==
+                                        Brightness.light
+                                    ? const Color(0xFFE7E7E7)
+                                    : const Color(0xFF636777),
                               ),
                               SizedBox(
                                 height: 14.h,
                               ),
-                              RPadding(
-                                padding: REdgeInsets.symmetric(horizontal: 6.w),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    //tên khách sạn
-                                    Text(
-                                      hotels[index].hotel_name,
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                      style: Theme.of(context).textTheme.headlineSmall,
-                                    ),
-                                    SizedBox(
-                                      height: 4.h,
-                                    ),
-                                    Text(
-                                      hotels[index].hotel_address,
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                      style: Theme.of(context).textTheme.bodyMedium,
-                                    ),
-                                    SizedBox(
-                                      height: 10.h,
-                                    ),
-                                    Divider(
-                                      height: 1.h,
-                                      thickness: 1,
-                                      color: Theme.of(context).brightness ==
-                                          Brightness.light
-                                          ? const Color(0xFFE7E7E7)
-                                          : const Color(0xFF636777),
-                                    ),
-                                    SizedBox(
-                                      height: 14.h,
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            SvgPicture.asset(
-                                                'assets/svg/bed_icon.svg'),
-                                            SizedBox(
-                                              width: 7.w,
-                                            ),
-                                            Text(
-                                              '2 Beds',
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .bodyMedium,
-                                            ),
-                                          ],
-                                        ),
-                                        Icon(
-                                          Icons.circle,
-                                          color: Theme.of(context).brightness ==
-                                              Brightness.light
-                                              ? const Color(0xFFE7E7E7)
-                                              : const Color(0xFF636777),
-                                          size: 10,
-                                        ),
-                                        Row(
-                                          children: [
-                                            const Icon(
-                                              Icons.wifi,
-                                              color: Color(0xFF3D5BF6),
-                                            ),
-                                            SizedBox(
-                                              width: 7.w,
-                                            ),
-                                            Text(
-                                              'Wifi',
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .bodyMedium,
-                                            ),
-                                          ],
-                                        ),
-                                        Icon(
-                                          Icons.circle,
-                                          color: Theme.of(context).brightness ==
-                                              Brightness.light
-                                              ? const Color(0xFFE7E7E7)
-                                              : const Color(0xFF636777),
-                                          size: 10,
-                                        ),
-                                        Row(
-                                          children: [
-                                            SvgPicture.asset(
-                                                'assets/svg/gym_icon.svg'),
-                                            SizedBox(
-                                              width: 7.w,
-                                            ),
-                                            Text(
-                                              'Gym',
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .bodyMedium,
-                                            ),
-                                          ],
-                                        )
-                                      ],
-                                    )
-                                  ],
-                                ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      SvgPicture.asset(
+                                          'assets/svg/bed_icon.svg'),
+                                      SizedBox(
+                                        width: 7.w,
+                                      ),
+                                      Text(
+                                        '2 Beds',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium,
+                                      ),
+                                    ],
+                                  ),
+                                  Icon(
+                                    Icons.circle,
+                                    color: Theme.of(context).brightness ==
+                                            Brightness.light
+                                        ? const Color(0xFFE7E7E7)
+                                        : const Color(0xFF636777),
+                                    size: 10,
+                                  ),
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.wifi,
+                                        color: Color(0xFF3D5BF6),
+                                      ),
+                                      SizedBox(
+                                        width: 7.w,
+                                      ),
+                                      Text(
+                                        'Wifi',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium,
+                                      ),
+                                    ],
+                                  ),
+                                  Icon(
+                                    Icons.circle,
+                                    color: Theme.of(context).brightness ==
+                                            Brightness.light
+                                        ? const Color(0xFFE7E7E7)
+                                        : const Color(0xFF636777),
+                                    size: 10,
+                                  ),
+                                  Row(
+                                    children: [
+                                      SvgPicture.asset(
+                                          'assets/svg/gym_icon.svg'),
+                                      SizedBox(
+                                        width: 7.w,
+                                      ),
+                                      Text(
+                                        'Gym',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium,
+                                      ),
+                                    ],
+                                  )
+                                ],
                               )
                             ],
                           ),
-                        ),
-                      ),
-                    );
-                  }
-                },
+                        )
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
@@ -477,141 +410,109 @@ class _HomePageState extends State<HomePage> {
                 SizedBox(
                   height: 20.h,
                 ),
-                FutureBuilder<List<Hotel>>(
-                  future: fetchDataNearby(),
-                  builder: (BuildContext context, AsyncSnapshot<List<Hotel>> snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    } else if (snapshot.hasError) {
-                      return Center(
-                        child: Text('Error: ${snapshot.error}'),
-                      );
-                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const Center(
-                        child: Text('No data available.'),
-                      );
-                    } else {
-                      List<Hotel> hotels = snapshot.data!;
-                      return ListView.builder(
-                        shrinkWrap: true,
-                        scrollDirection: Axis.vertical,
-                        physics: const BouncingScrollPhysics(),
-                        itemCount: hotels.length,
-                        itemBuilder: (context, index) => InkWell(
-                          //chuyển form detail cho hotel
-                          onTap: () {
-                            CURRENT_HOTEL = hotels[index].hotel_id;
-                          Navigator.of(context).pushNamed(RouteGenerator.detailPage);
-                          },
-                          child: Container(
-                          margin: REdgeInsets.only(bottom: 15.h),
-                          padding: REdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                              boxShadow: kDefaultBoxShadow,
-                              color: Theme.of(context).inputDecorationTheme.fillColor,
-                              borderRadius: BorderRadius.all(Radius.circular(15.r))),
-                          child: Row(
-                            children: [
-                              ClipRRect(
-                                  borderRadius:
-                                  BorderRadius.all(Radius.circular(10.r)),
-                                  child: Image.network(
-                                    hotels[index].hotel_image,
-                                    width: 76.w,
-                                    height: 76.h,
-                                    fit: BoxFit.fill,
-                                  )),
-                              SizedBox(
-                                width: 12.w,
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    hotels[index].hotel_name,
-                                    style: Theme.of(context).textTheme.headlineSmall,
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 1,
-                                  ),
-                                  SizedBox(
-                                    width: 4.w,
-                                  ),
-                                  Text("${hotels[index].hotel_address.substring(0,35)}...",
-                                    style: Theme.of(context).textTheme.bodyMedium,
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 1
-                                  ),
-                                  SizedBox(
-                                    width: 8.w,
-                                  ),
-                                  Row(
+                ListView.builder(
+                  shrinkWrap: true,
+                  scrollDirection: Axis.vertical,
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: 5,
+                  itemBuilder: (context, index) => Container(
+                    margin: REdgeInsets.only(bottom: 15.h),
+                    padding: REdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                        boxShadow: kDefaultBoxShadow,
+                        color: Theme.of(context).inputDecorationTheme.fillColor,
+                        borderRadius: BorderRadius.all(Radius.circular(15.r))),
+                    child: Row(
+                      children: [
+                        ClipRRect(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(10.r)),
+                            child: Image.asset(
+                              'assets/images/hotel_image1.png',
+                              width: 76.w,
+                              height: 76.h,
+                              fit: BoxFit.fill,
+                            )),
+                        SizedBox(
+                          width: 12.w,
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Hyatt Washington Hotel',
+                              style: Theme.of(context).textTheme.headlineSmall,
+                            ),
+                            SizedBox(
+                              width: 4.w,
+                            ),
+                            Text('Purwokerto, Glempang',
+                                style: Theme.of(context).textTheme.bodyMedium),
+                            SizedBox(
+                              width: 8.w,
+                            ),
+                            Row(
+                              children: [
+                                Text.rich(
+                                  textAlign: TextAlign.left,
+                                  TextSpan(
                                     children: [
-                                      Text.rich(
-                                        textAlign: TextAlign.left,
-                                        TextSpan(
-                                          children: [
-                                            TextSpan(
-                                              text: formatCurrencyVND(hotels[index].hotel_price.toDouble()),
-                                              style: GoogleFonts.dmSans(
-                                                fontSize: 12.sp,
-                                                fontWeight: FontWeight.w700,
-                                                color: kBlueColor,
-                                              ),
-                                            ),
-                                            TextSpan(
-                                                text: '/Night',
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .bodyMedium),
-                                          ],
+                                      TextSpan(
+                                        text: '\$38',
+                                        style: GoogleFonts.dmSans(
+                                          fontSize: 12.sp,
+                                          fontWeight: FontWeight.w700,
+                                          color: kBlueColor,
                                         ),
                                       ),
-                                      SizedBox(
-                                        width: 21.w,
-                                      ),
-                                      Row(
+                                      TextSpan(
+                                          text: '/Night',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 21.w,
+                                ),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.star,
+                                      color: kYellowColor,
+                                      size: 16.r,
+                                    ),
+                                    SizedBox(
+                                      width: 5.w,
+                                    ),
+                                    Text.rich(
+                                      textAlign: TextAlign.left,
+                                      TextSpan(
                                         children: [
-                                          Icon(
-                                            Icons.star,
-                                            color: kYellowColor,
-                                            size: 16.r,
+                                          TextSpan(
+                                            text: '4.7 ',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleLarge,
                                           ),
-                                          SizedBox(
-                                            width: 5.w,
-                                          ),
-                                          Text.rich(
-                                            textAlign: TextAlign.left,
-                                            TextSpan(
-                                              children: [
-                                                TextSpan(
-                                                  text: '${hotels[index].hotel_rating} ',
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .titleLarge,
-                                                ),
-                                                TextSpan(
-                                                    text: '0 Reviews)',
-                                                    style: Theme.of(context)
-                                                        .textTheme
-                                                        .bodyMedium),
-                                              ],
-                                            ),
-                                          ),
+                                          TextSpan(
+                                              text: '186 Reviews)',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyMedium),
                                         ],
                                       ),
-                                    ],
-                                  )
-                                ],
-                              )
-                            ],
-                          ),
-                        ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            )
+                          ],
                         )
-                      );
-                    }
-                  },
+                      ],
+                    ),
+                  ),
                 ),
                 SizedBox(
                   height: 20.h,
@@ -623,11 +524,159 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-  String formatCurrencyVND(double amount) {
-    final formatter = NumberFormat.currency(
-      locale: 'vi_VN',
-      symbol: 'đ',
-    );
-    return formatter.format(amount);
+}
+
+// class MyLocationScreen extends StatefulWidget {
+//   @override
+//   _MyLocationScreenState createState() => _MyLocationScreenState();
+// }
+//
+// class _MyLocationScreenState extends State<MyLocationScreen> {
+//   String _currentAddress = 'Fetching address...';
+//
+//   @override
+//   void initState() {
+//     super.initState();
+//     _getCurrentLocation();
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text('My Location'),
+//       ),
+//       body: Center(
+//         child: Text(_currentAddress),
+//       ),
+//     );
+//   }
+//
+//   Future<void> _getCurrentLocation() async {
+//     try {
+//       Position position = await Geolocator.getCurrentPosition(
+//         desiredAccuracy: LocationAccuracy.high,
+//       );
+//
+//       List<Placemark> placemarks = await placemarkFromCoordinates(
+//         position.latitude,
+//         position.longitude,
+//       );
+//
+//       if (placemarks.isNotEmpty) {
+//         Placemark placemark = placemarks.first;
+//         String address = "${placemark.name}, ${placemark.locality}, ${placemark.country}";
+//         setState(() {
+//           _currentAddress = address;
+//         });
+//       }
+//     } catch (e) {
+//       print(e);
+//       setState(() {
+//         _currentAddress = 'Error getting location';
+//       });
+//     }
+//   }
+// }
+//
+// void main() {
+//   runApp(MaterialApp(
+//     home: MyLocationScreen(),
+//   ));
+// }
+
+
+class MyLocationScreen extends StatefulWidget {
+  @override
+  _MyLocationScreenState createState() => _MyLocationScreenState();
+}
+
+class _MyLocationScreenState extends State<MyLocationScreen> {
+  String _currentAddress = 'Fetching address...';
+  LatLng _currentLatLng = LatLng(37.7749, -122.4194); // Default location (San Francisco)
+  GoogleMapController? _mapController;
+
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentLocation();
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('My Location'),
+      ),
+      body: Stack(
+        children: [
+          GoogleMap(
+            initialCameraPosition: CameraPosition(
+              target: _currentLatLng,
+              zoom: 15.0,
+            ),
+            markers: {
+              Marker(
+                markerId: MarkerId('current_location_marker'),
+                position: _currentLatLng,
+                infoWindow: InfoWindow(title: 'Current Location', snippet: _currentAddress),
+              ),
+            },
+            onMapCreated: (controller) {
+              setState(() {
+                _mapController = controller;
+              });
+            },
+          ),
+          Positioned(
+            bottom: 16.0,
+            left: 16.0,
+            child: Container(
+              padding: EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: Text(_currentAddress),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _getCurrentLocation() async {
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      if (placemarks.isNotEmpty) {
+        Placemark placemark = placemarks.first;
+        String address = "${placemark.name}, ${placemark.locality}, ${placemark.country}";
+        LatLng latLng = LatLng(position.latitude, position.longitude);
+        setState(() {
+          _currentAddress = address;
+          _currentLatLng = latLng;
+        });
+        _mapController?.animateCamera(CameraUpdate.newLatLng(_currentLatLng));
+      }
+    } catch (e) {
+      print(e);
+      setState(() {
+        _currentAddress = 'Error getting location';
+      });
+    }
+  }
+}
+
+void main() {
+  runApp(MaterialApp(
+    home: MyLocationScreen(),
+  ));
 }
