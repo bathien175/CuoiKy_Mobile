@@ -1,3 +1,4 @@
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -5,6 +6,9 @@ import 'package:homelyn/components/c_checkbox.dart';
 import 'package:homelyn/components/c_elevated_button.dart';
 
 import '../config/constants.dart';
+import '../models/current_hotel.dart';
+import '../models/current_save_booking.dart';
+import '../models/current_user.dart';
 import '../utils/routes.dart';
 import 'action_success_bottom_sheet.dart';
 
@@ -43,7 +47,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
               action: 'Close',
               onPressed: () {
                 Navigator.of(context).pushNamed(
-                  RouteGenerator.loginPage,
+                  RouteGenerator.navigationPage,
                 );
               }),
         );
@@ -176,10 +180,35 @@ class _PaymentMethodState extends State<PaymentMethod> {
           CElevatedButton(
               child: const Text('Confirm and Pay'),
               onPressed: () {
+                _updateData();
                 _bookingSuccessful(context);
               }),
         ],
       ),
     );
   }
+
+  Future<void> _updateData() async {
+    // ignore: deprecated_member_use
+    final DatabaseReference reviewRef = FirebaseDatabase.instance.reference()
+        .child('Bookings');
+    DatabaseReference newreviewRef = reviewRef.push(); // Tạo mới một child node trong 'Reviews'
+    String newReviewKey = newreviewRef.key!;
+
+    await reviewRef.child(newReviewKey).set({
+      'iid': newReviewKey,
+      'hotel_id': CURRENT_HOTEL,
+      'user_id': CURRENT_USER_ID,
+      'timestamp': ServerValue.timestamp,
+      'date_bookings': DateTime.now().toString(),
+      'hotel_name': CURRENT_HOTEL_NAME,
+      'hotel_image': CURRENT_HOTEL_IMAGE,
+      'guests': CURRENT_CHILDREN + CURRENT_ADULT,
+      'rooms': CURRENT_ROOM,
+      'total_day': DATE_NIGHTS,
+      'total_price': TOTAL_PRICE,
+      'status': 1
+    });
+  }
+
 }

@@ -5,7 +5,21 @@ class City {
   City({required this.name, required this.id});
 }
 
+class Gender {
+  String sex;
+  int id;
+
+  Gender({required this.sex, required this.id});
+}
+
+List<Gender> genderList = [
+  Gender(sex: '', id: 0),
+  Gender(sex: 'Nam', id: 1),
+  Gender(sex: 'Nữ', id: 2),
+  Gender(sex: 'Khác', id: 3),
+];
 List<City> vietnamCities = [
+  City(name: "",id: 0),
   City(name: "Hà Nội", id: 1),
   City(name: "Hà Giang", id: 2),
   City(name: "Cao Bằng", id: 4),

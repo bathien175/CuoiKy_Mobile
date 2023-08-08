@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:homelyn/models/current_hotel.dart';
 import 'package:homelyn/widgets/my_cupon.dart';
 import 'package:homelyn/widgets/payment_method.dart';
 import 'package:homelyn/widgets/room_and_guests.dart';
+import 'package:intl/intl.dart';
 import '../../components/c_elevated_button.dart';
 import '../../config/constants.dart';
+import '../../models/current_save_booking.dart';
 
 class CheckoutPage extends StatefulWidget {
   const CheckoutPage({super.key});
@@ -16,8 +19,12 @@ class CheckoutPage extends StatefulWidget {
 }
 
 class _CheckoutPageState extends State<CheckoutPage> {
+  String guestandRoom = GUEST_AND_ROOM;
   void _roomAndGuests(BuildContext ctx) {
-    showModalBottomSheet(
+    showModalBottomSheetWithCallback(ctx);
+  }
+  Future<void> showModalBottomSheetWithCallback(BuildContext ctx) async {
+    await showModalBottomSheet(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       context: ctx,
       shape: RoundedRectangleBorder(
@@ -28,13 +35,26 @@ class _CheckoutPageState extends State<CheckoutPage> {
       ),
       builder: (_) {
         return GestureDetector(
-            onTap: () {},
-            behavior: HitTestBehavior.opaque,
-            child: const RoomAndGuests());
+          onTap: () {},
+          behavior: HitTestBehavior.opaque,
+          child: const RoomAndGuests(),
+        );
       },
     );
+    // Form đã đóng, gọi lại setState() ở đây
+    setState(() {
+      // Cập nhật trạng thái của guests
+      guestandRoom = GUEST_AND_ROOM;
+    });
   }
 
+  String subStringAddress(String address){
+    if(address.length>40){
+      return '${address.substring(0,35)}...';
+    }else{
+      return address;
+    }
+  }
   void _selectPayment(BuildContext ctx) {
     showModalBottomSheet(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -73,15 +93,50 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 
-  DateTimeRange dateTimeRange = DateTimeRange(
+  String formatCurrencyVND(double amount) {
+    final formatter = NumberFormat.currency(
+      locale: 'vi_VN',
+      symbol: 'đ',
+    );
+    return formatter.format(amount);
+  }
+
+  // DateTime start = DateTime.now();
+  // DateTime end = DateTime.now().add(const Duration(days: 1));
+
+  DateTimeRange dateRange = DateTimeRange(
     start: DateTime.now(),
-    end: DateTime.now(),
+    end: DateTime.now().add(const Duration(days: 1)),
   );
+
+  late int totaldDate = dateRange.end.difference(dateRange.start).inDays;
+
+  int cleaningFee = 50000;
+  // late int priceRoom = CURRENT_HOTEL_PRICE * totaldDate;
+  // late int totalPrice = (CURRENT_HOTEL_PRICE * totaldDate) + cleaningFee;
+
+  late int priceRoom = 0;
+  late int totalPrice;
+
+  @override
+  void initState() {
+    super.initState();
+    updateTotalDate(); // Call updateTotalDate in initState
+  }
+
+  void updateTotalDate() {
+    totaldDate = dateRange.end.difference(dateRange.start).inDays;
+    DATE_START = dateRange.start;
+    DATE_END = dateRange.end;
+    DATE_NIGHTS = totaldDate;
+    priceRoom = CURRENT_HOTEL_PRICE * totaldDate * CURRENT_ROOM;
+    totalPrice = priceRoom + cleaningFee;
+  }
 
   @override
   Widget build(BuildContext context) {
-    final start = dateTimeRange.start;
-    final end = dateTimeRange.end;
+    final start = dateRange.start;
+    final end = dateRange.end;
     return Scaffold(
       body: ListView(
         shrinkWrap: true,
@@ -104,6 +159,15 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           shape: BoxShape.circle),
                       child: InkWell(
                         onTap: () {
+                          CURRENT_ROOM = 1;
+                          CURRENT_CHILDREN = 0;
+                          CURRENT_ADULT = 0;
+                          GUEST_AND_ROOM = "0 Guests (1 Room)";
+                           DATE_START = DateTime.now();
+                           DATE_END = DateTime.now().add(const Duration(days: 1));
+                           DATE_NIGHTS = 1;
+                           CLEANING_FEE = 50000;
+                           TOTAL_PRICE = 0;
                           Navigator.pop(context);
                         },
                         child: Icon(
@@ -147,8 +211,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     children: [
                       ClipRRect(
                           borderRadius: BorderRadius.all(Radius.circular(10.r)),
-                          child: Image.asset(
-                            'assets/images/hotel_image.png',
+                          child: Image.network(
+                            CURRENT_HOTEL_IMAGE,
                             width: 76.w,
                             height: 76.h,
                             fit: BoxFit.fill,
@@ -160,14 +224,14 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Diamond Heart Hotel',
+                            CURRENT_HOTEL_NAME,
                             style: Theme.of(context).textTheme.headlineSmall,
                           ),
                           SizedBox(
                             width: 4.w,
                           ),
                           Text(
-                            'Purwokerto, Karang Lewas',
+                            subStringAddress(CURRENT_HOTEL_ADDRESS),
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                           SizedBox(
@@ -180,23 +244,24 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                 TextSpan(
                                   children: [
                                     TextSpan(
-                                      text: '\$38',
+                                      text: formatCurrencyVND(
+                                          CURRENT_HOTEL_PRICE.toDouble()),
                                       style: GoogleFonts.dmSans(
-                                        fontSize: 12.sp,
-                                        fontWeight: FontWeight.w700,
+                                        fontSize: 10.sp,
+                                        fontWeight: FontWeight.w600,
                                         color: kBlueColor,
                                       ),
                                     ),
                                     TextSpan(
                                       text: '/Night',
                                       style:
-                                          Theme.of(context).textTheme.bodyMedium,
+                                          Theme.of(context).textTheme.bodySmall,
                                     ),
                                   ],
                                 ),
                               ),
                               SizedBox(
-                                width: 21.w,
+                                width: 5.w,
                               ),
                               Row(
                                 children: [
@@ -213,16 +278,17 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                     TextSpan(
                                       children: [
                                         TextSpan(
-                                          text: '4.7 ',
+                                          text: '$CURRENT_HOTEL_RATING ',
                                           style: Theme.of(context)
                                               .textTheme
-                                              .titleLarge,
+                                              .titleMedium,
                                         ),
                                         TextSpan(
-                                          text: '186 Reviews)',
+                                          text:
+                                              '$CURRENT_HOTEL_COUNT_RATING Reviews)',
                                           style: Theme.of(context)
                                               .textTheme
-                                              .bodyMedium,
+                                              .bodySmall,
                                         ),
                                       ],
                                     ),
@@ -260,12 +326,45 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                   : const Color(0xFF292E32),
                           width: 1.w)),
                   child: ListTile(
-                    onTap: () {
-                      pickDateRange();
+                    onTap: () async {
+                      await pickDateRange();
+                      updateTotalDate();
                     },
                     leading: SvgPicture.asset('assets/svg/calender_icon.svg'),
                     title: Text(
-                      '${start.day} - ${end.day} ${end.month} ${end.year}',
+                      // '${start.day}/${start.month}/${start.year} - ${end.day}/${end.month}/${end.year}',
+                      '${start.day}/${start.month}/${start.year}',
+                      // '${start.day} - ' + DateFormat('dd/MM/yyyy').format(end),
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineSmall!
+                          .copyWith(fontWeight: FontWeight.w400),
+                    ),
+                    trailing: const Icon(Icons.keyboard_arrow_down),
+                  ),
+                ),
+                SizedBox(
+                  height: 20.h,
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                      color: Theme.of(context).inputDecorationTheme.fillColor,
+                      borderRadius: BorderRadius.all(Radius.circular(15.r)),
+                      border: Border.all(
+                          color:
+                              Theme.of(context).brightness == Brightness.light
+                                  ? const Color(0xFFE2E4EA)
+                                  : const Color(0xFF292E32),
+                          width: 1.w)),
+                  child: ListTile(
+                    onTap: () async {
+                      await pickDateRange();
+                      updateTotalDate();
+                    },
+                    leading: SvgPicture.asset('assets/svg/calender_icon.svg'),
+                    title: Text(
+                      // '${start.day}/${start.month}/${start.year} - ${end.day}/${end.month}/${end.year}',
+                      '${end.day}/${end.month}/${end.year}',
                       // '${start.day} - ' + DateFormat('dd/MM/yyyy').format(end),
                       style: Theme.of(context)
                           .textTheme
@@ -301,10 +400,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   child: ListTile(
                     onTap: () {
                       _roomAndGuests(context);
-                    },
+                      },
                     leading: SvgPicture.asset('assets/svg/user_icon.svg'),
                     title: Text(
-                      '2 Guests (1 Room)',
+                      guestandRoom,
                       style: Theme.of(context)
                           .textTheme
                           .headlineSmall!
@@ -371,9 +470,15 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('\$46 x 3 Nights',
+                    // Text('$CURRENT_HOTEL_PRICE x $totaldDate Nights',
+                    //     style: Theme.of(context).textTheme.titleMedium),
+                    Text(
+                      '${formatCurrencyVND(CURRENT_HOTEL_PRICE.toDouble())}  x $CURRENT_ROOM Room x $totaldDate Nights',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+
+                    Text(formatCurrencyVND(priceRoom.toDouble()),
                         style: Theme.of(context).textTheme.titleMedium),
-                    Text('\$138', style: Theme.of(context).textTheme.titleMedium),
                   ],
                 ),
                 SizedBox(
@@ -384,7 +489,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   children: [
                     Text('Cleaning Fee',
                         style: Theme.of(context).textTheme.titleMedium),
-                    Text('\$4', style: Theme.of(context).textTheme.titleMedium),
+                    Text(formatCurrencyVND(cleaningFee.toDouble()),
+                        style: Theme.of(context).textTheme.titleMedium),
                   ],
                 ),
                 SizedBox(
@@ -395,7 +501,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   children: [
                     Text('Total (USD)',
                         style: Theme.of(context).textTheme.headlineSmall),
-                    Text('\$142', style: Theme.of(context).textTheme.titleMedium),
+                    Text(formatCurrencyVND(totalPrice.toDouble()),
+                        style: Theme.of(context).textTheme.titleMedium),
                   ],
                 ),
               ],
@@ -417,6 +524,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
               'Select Payment',
             ),
             onPressed: () {
+              TOTAL_PRICE = totalPrice;
               _selectPayment(context);
             }),
       ),
@@ -424,16 +532,17 @@ class _CheckoutPageState extends State<CheckoutPage> {
   }
 
   Future pickDateRange() async {
-    DateTimeRange? newDateRange = await showDateRangePicker(
+    DateTimeRange? selectedDateRange = await showDateRangePicker(
       context: context,
-      initialDateRange: dateTimeRange,
+      initialDateRange: dateRange,
       firstDate: DateTime(1900),
-      lastDate: DateTime(2100),
-      saveText: 'Save',
+      lastDate: DateTime(2200),
     );
-    if (newDateRange == null) return; //pressed x/ calcel
+
+    if (selectedDateRange == null) return;
+
     setState(() {
-      dateTimeRange = newDateRange;
+      dateRange = selectedDateRange; // Assign the selectedDateRange directly
     });
   }
 }

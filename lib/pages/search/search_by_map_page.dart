@@ -24,6 +24,7 @@ class _SearchByMapPageState extends State<SearchByMapPage> {
   LatLng _hotelLatLng = const LatLng(0, 0); // Tọa độ khách sạn
   String hotelAddress = "19C Bùi Thị Xuân, phường Bến Thành, Thành phố Hồ Chí Minh";
    List<Polyline> _polyLines = [];
+  List<LatLng> routePoints = [];
   @override
   void initState() {
     super.initState();
@@ -47,24 +48,36 @@ class _SearchByMapPageState extends State<SearchByMapPage> {
               target: _currentLatLng,
               zoom: 15.0,
             ),
+            // onMapCreated: (controller) {
+            //   setState(() {
+            //     _mapController = controller;
+            //   });
+            // _drawRoute2(); // Draw the route when the map is ready
+            // },
             markers: {
-          Marker(
-          markerId: const MarkerId('current_location_marker'),
-          position: _currentLatLng,
-          icon: _currentLocationIcon,
-          infoWindow: InfoWindow(title: 'Current Location', snippet: _currentAddress),
-          ),
+              Marker(
+                markerId: const MarkerId('current_location_marker'),
+                position: _currentLatLng,
+                icon: _currentLocationIcon,
+                infoWindow: InfoWindow(title: 'Current Location', snippet: _currentAddress),
+                ),
 
-          Marker(
-                markerId: const MarkerId('hotel_marker'),
-                position: _hotelLatLng,
-                icon: _hotelIcon,
-                infoWindow: InfoWindow(title: 'Hotel', snippet: hotelAddress),
-                onTap: () {
-                  _navigateToHotel();
-                },
-              ),
-            },
+            Marker(
+                  markerId: const MarkerId('hotel_marker'),
+                  position: _hotelLatLng,
+                  icon: _hotelIcon,
+                  infoWindow: InfoWindow(title: 'Hotel', snippet: hotelAddress),
+                  onTap: () {
+                    _navigateToHotel();
+                  },
+                ),
+              },
+            // polylines: {
+            //   if(routePoints.isNotEmpty)
+            //     Polyline(polylineId: const PolylineId("route"),
+            //     color: Colors.blue,
+            //     points: routePoints)
+            // },
             polylines: _polyLines.toSet(),
             onMapCreated: (controller) {
               setState(() {
@@ -178,7 +191,7 @@ class _SearchByMapPageState extends State<SearchByMapPage> {
   }
   Future<void> _drawRoute() async {
     final google_directions.GoogleMapsDirections directionsService = google_directions.GoogleMapsDirections(
-      apiKey: 'AIzaSyCBPpJKvfbdwB6OL9yCsIUeQGFKEcydB3Y', // Thay YOUR_GOOGLE_MAPS_API_KEY bằng khóa API của bạn
+      apiKey: 'AIzaSyAG3SSMXPUldPt4ogGe_lwZIFbqDF7KM6A',
     );
 
     final google_directions.DirectionsResponse response = await directionsService.directions(
@@ -219,6 +232,20 @@ class _SearchByMapPageState extends State<SearchByMapPage> {
           width: 3,
         ));
       });
+    }
+  }
+
+  Future<void> _drawRoute2() async {
+    google_directions.GoogleMapsDirections directionsApi = google_directions.GoogleMapsDirections(apiKey: 'AIzaSyAG3SSMXPUldPt4ogGe_lwZIFbqDF7KM6A');
+
+    google_directions.DirectionsResponse response = await directionsApi.directionsWithLocation(
+      google_directions.Location(lat: _currentLatLng.latitude, lng: _currentLatLng.longitude), // Điểm xuất phát
+      google_directions.Location(lat: _hotelLatLng.latitude, lng: _hotelLatLng.longitude), // Điểm đến
+    );
+
+    List<google_directions.Step> steps = response.routes[0].legs[0].steps;
+    for (var step in steps) {
+      routePoints.add(LatLng(step.startLocation.lat, step.startLocation.lng));
     }
   }
 

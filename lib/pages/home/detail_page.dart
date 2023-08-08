@@ -6,8 +6,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:homelyn/components/c_elevated_button.dart';
+import 'package:homelyn/models/current_user.dart';
 import 'package:intl/intl.dart';
-
 import '../../config/constants.dart';
 import '../../models/current_hotel.dart';
 import '../../models/model_hotel.dart';
@@ -23,6 +23,9 @@ class DetailPage extends StatefulWidget {
 
 class _DetailPageState extends State<DetailPage> {
   final CarouselController _controller = CarouselController();
+
+  bool isLiked = false;
+
   bool showFullDescription = false;
   late Future<Hotel> _currentHotel;
 
@@ -30,6 +33,7 @@ class _DetailPageState extends State<DetailPage> {
   void initState() {
     super.initState();
     _currentHotel = getCurrentHotel(CURRENT_HOTEL);
+    LoadFavouriteHotel();
   }
 
   @override
@@ -114,10 +118,15 @@ class _DetailPageState extends State<DetailPage> {
                                     shape: BoxShape.circle),
                                 child: InkWell(
                                     onTap: () {
-                                      Navigator.pop(context);
+                                      setState(() {
+                                        // Thay đổi trạng thái yêu thích khi nhấp vào
+                                        isLiked = !isLiked;
+                                        // Gọi hàm thực hiện thay đổi dữ liệu cơ sở dữ liệu
+                                        like();
+                                      });
                                     },
-                                    child: SvgPicture.asset(
-                                        'assets/svg/favourite_icon_dark.svg')),
+                                    child: SvgPicture.asset('assets/svg/favourite_icon_light.svg',color: isLiked ? Colors.red : null,),
+                                )
                               ),
                             ],
                           )
@@ -656,5 +665,37 @@ class _DetailPageState extends State<DetailPage> {
       symbol: 'đ',
     );
     return formatter.format(amount);
+  }
+
+  // ignore: non_constant_identifier_names
+  Future<void> LoadFavouriteHotel() async {
+    // ignore: deprecated_member_use
+    final databaseReference = FirebaseDatabase.instance.reference();
+    DataSnapshot snapshot = (await databaseReference.child('Favourites').orderByChild('hotel_id').equalTo(CURRENT_HOTEL).once()).snapshot;
+    Map<dynamic, dynamic>? hotelData = snapshot.value as Map?;
+    if(hotelData!=null){
+      hotelData.forEach((key, value) {
+        if(value['user_id']==CURRENT_USER_ID){
+          setState(() {
+            isLiked = true;
+          });
+        }
+      });
+    }
+  }
+
+  Future<void> like() async {
+    // Thực hiện việc thay đổi trạng thái yêu thích
+    // ... (thực hiện việc thay đổi biến isLike và cập nhật dữ liệu cơ sở dữ liệu)
+    // ignore: deprecated_member_use
+    final databaseReference = FirebaseDatabase.instance.reference();
+    if(isLiked){
+      await databaseReference.child('Favourites').child('$CURRENT_USER_ID like $CURRENT_HOTEL').set({
+        'user_id': CURRENT_USER_ID,
+        'hotel_id': CURRENT_HOTEL,
+      });
+    }else{
+      databaseReference.child('Favourites/abc').remove();
+    }
   }
 }

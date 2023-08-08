@@ -2,6 +2,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:get/get.dart';
 import 'package:homelyn/components/c_elevated_button.dart';
 import 'package:homelyn/widgets/profile_badge.dart';
 import 'package:homelyn/models/current_user.dart';
@@ -12,6 +13,7 @@ import '../../components/c_text_form_field_readonly.dart';
 import '../../config/constants.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../../utils/routes.dart';
+import '../../widgets/dropdown_custom.dart';
 
 class MyProfilePage extends StatefulWidget {
   const MyProfilePage({super.key});
@@ -22,6 +24,8 @@ class MyProfilePage extends StatefulWidget {
 
 class _MyProfilePageState extends State<MyProfilePage> {
   final String initialValue = CURRENT_USER_PHONE;
+  String selectedCityValue=CURRENT_USER_CITY;
+  String selectedGenderValue=CURRENT_USER_SEX;
 
   final TextEditingController _fullNameController =
   TextEditingController(text: CURRENT_USER_NAME);
@@ -39,7 +43,6 @@ class _MyProfilePageState extends State<MyProfilePage> {
   TextEditingController(text: CURRENT_USER_CITY);
 
   bool showPhoneField = false;
-  late String selectedGender;
 
   @override
   void initState() {
@@ -188,22 +191,25 @@ class _MyProfilePageState extends State<MyProfilePage> {
                 SizedBox(
                   height: 10.h,
                 ),
-                CTextFormField(
-                  hintText: 'Select your gender',
-                  textInputAction: TextInputAction.next,
-                  keyboardType: TextInputType.multiline,
-                  prefixIcon: Theme.of(context).brightness == Brightness.light
-                      ? SvgPicture.asset('assets/svg/sex_icon_light.svg',)
-                      : SvgPicture.asset('assets/svg/sex_icon_dark.svg',),
-                  initialValue: CURRENT_USER_SEX,
-                  onChanged: (value) {
-                    if (value.isEmpty) {
-                      _sexController.text = CURRENT_USER_SEX;
-                    } else {
-                      _sexController.text = value;
-                    }
-                  },
-                ),
+                // CTextFormField(
+                //   hintText: 'Select your gender',
+                //   textInputAction: TextInputAction.next,
+                //   keyboardType: TextInputType.multiline,
+                //   prefixIcon: Theme.of(context).brightness == Brightness.light
+                //       ? SvgPicture.asset('assets/svg/sex_icon_light.svg',)
+                //       : SvgPicture.asset('assets/svg/sex_icon_dark.svg',),
+                //   initialValue: CURRENT_USER_SEX,
+                //   onChanged: (value) {
+                //     if (value.isEmpty) {
+                //       _sexController.text = CURRENT_USER_SEX;
+                //     } else {
+                //       _sexController.text = value;
+                //     }
+                //   },
+                // ),
+                CustomDropdownGender(key: const Key('listgenderselect'),CURRENT_USER_SEX,(selected) {
+                  selectedGenderValue = selected;
+                }),
                 SizedBox(
                   height: 20.h,
                 ),
@@ -275,22 +281,25 @@ class _MyProfilePageState extends State<MyProfilePage> {
                 SizedBox(
                   height: 10.h,
                 ),
-                CTextFormField(
-                  hintText: 'Enter your city',
-                  textInputAction: TextInputAction.next,
-                  keyboardType: TextInputType.text,
-                  prefixIcon: Theme.of(context).brightness == Brightness.light
-                      ? SvgPicture.asset('assets/svg/city_icon_light.svg',)
-                      : SvgPicture.asset('assets/svg/city_icon_dark.svg',),
-                  initialValue: CURRENT_USER_CITY,
-                  onChanged: (value) {
-                    if (value.isEmpty) {
-                      _cityController.text = CURRENT_USER_CITY;
-                    } else {
-                      _cityController.text = value;
-                    }
-                  },
-                ),
+                // CTextFormField(
+                //   hintText: 'Enter your city',
+                //   textInputAction: TextInputAction.next,
+                //   keyboardType: TextInputType.text,
+                //   prefixIcon: Theme.of(context).brightness == Brightness.light
+                //       ? SvgPicture.asset('assets/svg/city_icon_light.svg',)
+                //       : SvgPicture.asset('assets/svg/city_icon_dark.svg',),
+                //   initialValue: CURRENT_USER_CITY,
+                //   onChanged: (value) {
+                //     if (value.isEmpty) {
+                //       _cityController.text = CURRENT_USER_CITY;
+                //     } else {
+                //       _cityController.text = value;
+                //     }
+                //   },
+                // ),
+                CustomDropdown(CURRENT_USER_CITY,key: const Key('ListCity'), (selectValue){
+                  selectedCityValue = selectValue;
+                }),
                 SizedBox(
                   height: 50.h,
                 ),
@@ -328,16 +337,16 @@ class _MyProfilePageState extends State<MyProfilePage> {
 
   Future<void> _updateUserProfile() async {
     String fullName = _fullNameController.text;
-    String sex = _sexController.text;
+    String sex = selectedGenderValue;
     String birthday = _birthdayController.text;
     String address = _addressController.text;
-    String city = _cityController.text;
+    String city = selectedCityValue;
     if (fullName.isEmpty) {
       showToast('Please enter your full name.');
       return;
     }
     if (sex.isEmpty) {
-      showToast('Please enter your gender.');
+      showToast('Please choose your gender.');
       return;
     }
     if (birthday.isEmpty) {

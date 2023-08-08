@@ -123,7 +123,7 @@ class _MessagesEmptyStatePageState extends State<MessagesEmptyStatePage> {
                 ),
                 Center(
                   child: Text(
-                    'No Messages Here',
+                    'Tính năng đang phát triển',
                     style: Theme.of(context).textTheme.displayLarge,
                   ),
                 ),
@@ -132,7 +132,7 @@ class _MessagesEmptyStatePageState extends State<MessagesEmptyStatePage> {
                 ),
                 Center(
                   child: Text(
-                    'Let’s start messaging with others or with seller',
+                    'Đây là một tính năng đang phát triển',
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                 ),
