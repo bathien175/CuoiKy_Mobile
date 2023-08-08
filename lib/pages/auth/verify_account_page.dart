@@ -31,9 +31,13 @@ class _VerifyAccountPageState extends State<VerifyAccountPage> {
         String phoneNumber = '+84 ${RegisterPage.phone}';
         String password = RegisterPage.password;
         String fullname = RegisterPage.fullname;
+        String birthday = '';
+        String sex = '';
+        String address = '';
+        String city = '';
 
         // Save the user data to the database
-        await saveUserDataToDatabase(user.uid,fullname ,phoneNumber, password);
+        await saveUserDataToDatabase(user.uid, fullname ,phoneNumber, password, birthday, sex, address, city);
 
         // ignore: use_build_context_synchronously
         showModalBottomSheet(
@@ -79,7 +83,8 @@ class _VerifyAccountPageState extends State<VerifyAccountPage> {
     }
   }
 
-  Future<void> saveUserDataToDatabase(String uid,String fullname, String phoneNumber, String password) async {
+  Future<void> saveUserDataToDatabase(String uid, String fullname, String phoneNumber, String password,
+                                      String birthday, String sex, String address, String city) async {
     try {
       // Get a reference to the Firebase Realtime Database
       // ignore: deprecated_member_use
@@ -91,7 +96,11 @@ class _VerifyAccountPageState extends State<VerifyAccountPage> {
         'fullname': fullname,
         'phoneNumber': phoneNumber,
         'password': password,
-        'image': "https://www.kindpng.com/picc/m/22-223863_no-avatar-png-circle-transparent-png.png"
+        'image': "https://www.kindpng.com/picc/m/22-223863_no-avatar-png-circle-transparent-png.png",
+        'birthday': birthday,
+        'sex': sex,
+        'address': address,
+        'city': city,
       });
     } catch (e) {
       showToast("Lỗi truy cập server");

@@ -2,6 +2,8 @@ import 'package:badges/badges.dart' as badge;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+// ignore: unused_import
+import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:homelyn/models/current_user.dart';
 
@@ -31,6 +33,13 @@ class _ProfileBadgeState extends State<ProfileBadge> {
 
 
   // Function to upload image to Firebase Storage
+  // Future<String> _uploadImage(File imageFile) async {
+  //   String fileName = DateTime.now().toString() + '.png';
+  //   firebase_storage.Reference ref =
+  //   firebase_storage.FirebaseStorage.instance.ref().child(fileName);
+  //   await ref.putFile(imageFile);
+  //   return await ref.getDownloadURL();
+  // }
 
   @override
   Widget build(BuildContext context) {

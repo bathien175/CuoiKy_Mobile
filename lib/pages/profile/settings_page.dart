@@ -43,7 +43,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           shape: BoxShape.circle),
                       child: InkWell(
                         onTap: () {
-                          Navigator.of(context).pushNamed(RouteGenerator.profilePage);
+                          Navigator.of(context).pushNamed(RouteGenerator.navigationPage);
                         },
                         child: Icon(
                           Icons.arrow_back,
@@ -284,7 +284,19 @@ class _SettingsPageState extends State<SettingsPage> {
                     onTap: () {
                       CURRENT_USER_ID = "";
                       CURRENT_USER_NAME = "";
+                      CURRENT_USER_NAME_TEMP = "";
                       CURRENT_USER_IMAGE = "";
+                      CURRENT_USER_IMAGE_TEMP = "";
+                      CURRENT_USER_BIRTHDAY = "";
+                      CURRENT_USER_BIRTHDAY_TEMP = "";
+                      CURRENT_USER_SEX = "";
+                      CURRENT_USER_SEX_TEMP = "";
+                      CURRENT_USER_ADDRESS = "";
+                      CURRENT_USER_ADDRESS_TEMP = "";
+                      CURRENT_USER_CITY = "";
+                      CURRENT_USER_CITY_TEMP = "";
+                      CURRENT_USER_EMAIL = "";
+                      CURRENT_USER_PHONE =  "";
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (context) => const WelcomePage()),

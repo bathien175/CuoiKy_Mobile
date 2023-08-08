@@ -13,8 +13,9 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/constants.dart';
-import '../../models/current_user.dart';
+import '../../models/current_hotel.dart';
 import '../../models/model_hotel.dart';
+import '../../models/model_rating.dart';
 import '../../utils/routes.dart';
 
 class DetailPage extends StatefulWidget {
@@ -33,15 +34,16 @@ class DetailPage extends StatefulWidget {
 
 class _DetailPageState extends State<DetailPage> {
   final CarouselController _controller = CarouselController();
+
   bool isLiked = false;
+
+  bool showFullDescription = false;
 
   late Future<Hotel> _currentHotel;
 
   // late PostProvider postProvider =
   //     Provider.of<PostProvider>(context, listen: false);
   late PostProvider postProvider;
-
-  bool showFullDescription = false;
 
   @override
   void initState() {
@@ -61,14 +63,16 @@ class _DetailPageState extends State<DetailPage> {
       hotelData.forEach((key, item) {
         hotels.add(
           Hotel(
-              hotel_id: item['hotel_id'],
-              hotel_name: item['hotel_name'],
-              hotel_address: item['hotel_address'],
-              hotel_city: item['hotel_city'],
-              hotel_rating: item['hotel_rating'],
-              hotel_price: item['hotel_price'],
-              hotel_image: item['hotel_image'],
-              hotel_description: item['hotel_description']),
+            hotel_id: item['hotel_id'],
+            hotel_name: item['hotel_name'],
+            hotel_address: item['hotel_address'],
+            hotel_city: item['hotel_city'],
+            hotel_rating: item['hotel_rating'],
+            hotel_price: item['hotel_price'],
+            hotel_image: item['hotel_image'],
+            hotel_description: item['hotel_description'],
+            count_rating: item['count_rating'],
+          ),
         );
       });
     }
@@ -153,62 +157,80 @@ class _DetailPageState extends State<DetailPage> {
                                         width: 17.w,
                                       ),
                                       Container(
-                                          padding: EdgeInsets.all(13.r),
-                                          decoration: const BoxDecoration(
-                                              color: Color.fromRGBO(
-                                                  21, 27, 51, 0.35),
-                                              shape: BoxShape.circle),
-                                          child: Consumer<PostProvider>(
-                                              builder: (context, value, child) {
+                                        padding: EdgeInsets.all(13.r),
+                                        decoration: const BoxDecoration(
+                                            color: Color.fromRGBO(
+                                                21, 27, 51, 0.35),
+                                            shape: BoxShape.circle),
+                                        child: Consumer<PostProvider>(
+                                          builder:
+                                              (context, postProvider, child) {
+                                            String id = currentHotel.hotel_id;
+                                            String hotelName =
+                                                currentHotel.hotel_name;
+                                            int hotelPrice =
+                                                currentHotel.hotel_price;
+                                            String hotelImage =
+                                                currentHotel.hotel_image;
+                                            String hotelCity =
+                                                currentHotel.hotel_city;
+
+                                            void onTapHandler() {
+                                              print(hotelPrice);
+                                              print(id);
+                                              // Handle onTap logic here...
+                                            }
+
+                                            void onPressedHandler() {
+                                              FollowingItem item =
+                                                  FollowingItem(
+                                                id,
+                                                hotelName,
+                                                hotelImage,
+                                                hotelCity,
+                                                hotelPrice,
+                                              );
+
+                                              if (postProvider.followingList
+                                                  .any((item) =>
+                                                      item.id == id)) {
+                                                postProvider
+                                                    .removeFollowing(item);
+                                              } else {
+                                                postProvider.addFollowing(item);
+                                              }
+                                            }
+
                                             return InkWell(
-                                              onTap: () {
-                                                String id =
-                                                    currentHotel.hotel_id;
-                                                String hotelName =
-                                                    currentHotel.hotel_name;
-
-                                                int hotelPrice =
-                                                    currentHotel.hotel_price;
-
-                                                String hotelImage =
-                                                    currentHotel.hotel_image;
-
-                                                String hotelCity =
-                                                    currentHotel.hotel_city;
-
-                                                // late PostProvider postProvider =
-                                                //     Provider.of<PostProvider>(
-                                                //         context,
-                                                //         listen: false);
-
-                                                if (postProvider.followingList
-                                                    .any((item) =>
-                                                        item.id == id)) {
-                                                  postProvider.remove(id);
-                                                } else {
-                                                  postProvider.add(
-                                                      id,
-                                                      hotelName,
-                                                      hotelImage,
-                                                      hotelPrice,
-                                                      hotelCity);
-                                                }
-
-                                                setState(() {
-                                                  isLiked = !isLiked;
-                                                });
-                                              },
-                                              child: Icon(
-                                                isLiked
-                                                    ? Icons.favorite
-                                                    : Icons.favorite_border,
-                                                color: isLiked
-                                                    ? Colors.red
-                                                    : Colors
-                                                        .white, // Thay đổi màu sắc tùy ý ở đây.
+                                              onTap:
+                                                  onPressedHandler, // Sử dụng onTap thay vì onPressed
+                                              child: Container(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: Icon(
+                                                  (postProvider.followingList
+                                                          .any((element) =>
+                                                              element.id == id))
+                                                      ? Icons.favorite
+                                                      : Icons
+                                                          .favorite, // Thay đổi icon thành biểu tượng trái tim (Icons.favorite)
+                                                  color: (postProvider
+                                                          .followingList
+                                                          .any((element) =>
+                                                              element.id == id))
+                                                      ? const Color.fromARGB(
+                                                          255,
+                                                          233,
+                                                          36,
+                                                          36) // Màu icon khi đang theo dõi (tuỳ chọn)
+                                                      : Colors.black,
+                                                  // Màu icon khi chưa theo dõi (tuỳ chọn)
+                                                ),
                                               ),
                                             );
-                                          })),
+                                          },
+                                        ),
+                                      )
                                     ],
                                   )
                                 ],
@@ -266,11 +288,10 @@ class _DetailPageState extends State<DetailPage> {
                                 SizedBox(
                                   width: 8.w,
                                 ),
-                                Text(currentHotel.hotel_address,
-                                    style:
-                                        Theme.of(context).textTheme.bodyLarge,
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 1),
+                                Text(
+                                  subStringAddress(currentHotel.hotel_address),
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                ),
                               ],
                             ),
                             const SizedBox(
@@ -291,16 +312,11 @@ class _DetailPageState extends State<DetailPage> {
                                   TextSpan(
                                     children: [
                                       TextSpan(
-                                        text: '${currentHotel.hotel_rating} ',
+                                        text:
+                                            '${currentHotel.hotel_rating.toDouble()} ',
                                         style: Theme.of(context)
                                             .textTheme
                                             .titleLarge,
-                                      ),
-                                      TextSpan(
-                                        text: '(0 Reviews)',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyLarge,
                                       ),
                                     ],
                                   ),
@@ -345,6 +361,7 @@ class _DetailPageState extends State<DetailPage> {
                                     : currentHotel.hotel_description.substring(
                                         0,
                                         100), // Chỉ hiển thị 100 ký tự đầu tiên
+
                                 style: Theme.of(context).textTheme.bodyLarge,
                               ),
                               if (!showFullDescription)
@@ -530,11 +547,6 @@ class _DetailPageState extends State<DetailPage> {
                                         SizedBox(
                                           width: 8.w,
                                         ),
-                                        Text(
-                                            'Haight Streetm Purwokerto, Karang Lewas',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodyLarge),
                                       ],
                                     ),
                                     SizedBox(
@@ -581,65 +593,6 @@ class _DetailPageState extends State<DetailPage> {
                         SizedBox(
                           height: 20.h,
                         ),
-                        ListView.builder(
-                          shrinkWrap: true,
-                          scrollDirection: Axis.vertical,
-                          physics: const BouncingScrollPhysics(),
-                          itemCount: 5,
-                          padding: REdgeInsets.all(0),
-                          itemBuilder: (context, index) => Column(
-                            children: [
-                              ListTile(
-                                contentPadding: REdgeInsets.all(0),
-                                leading: Container(
-                                  decoration: const BoxDecoration(
-                                      shape: BoxShape.circle),
-                                  child: Image.asset(
-                                    'assets/images/notification_image.png',
-                                    fit: BoxFit.fill,
-                                  ),
-                                ),
-                                title: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'Kim Borrdy',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .headlineSmall,
-                                    ),
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.star,
-                                          color: kYellowColor,
-                                          size: 13.r,
-                                        ),
-                                        SizedBox(
-                                          width: 5.w,
-                                        ),
-                                        Text(
-                                          '4.5',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleLarge,
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                subtitle: Text(
-                                  'Amazing! The room is good than the picture. Thanks for amazing experience!',
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              const Divider(),
-                            ],
-                          ),
-                        )
                       ],
                     ),
                   ),
@@ -712,11 +665,53 @@ class _DetailPageState extends State<DetailPage> {
         hotel_id: value['hotel_id'].toString(),
         hotel_image: value['hotel_image'].toString(),
         hotel_name: value['hotel_name'].toString(),
-        hotel_rating: value['hotel_rating'],
+        hotel_rating: value['hotel_rating'].toDouble(),
+        count_rating: value['count_rating'],
         hotel_price: value['hotel_price'],
       ));
     });
     return listHotel[0];
+  }
+
+  Future<List<RatingHotel>> getListComment() async {
+    List<RatingHotel> listH = <RatingHotel>[];
+    // ignore: deprecated_member_use
+    final databaseReference = FirebaseDatabase.instance.reference();
+    // Kiểm tra xem email đã tồn tại trong bảng "guests" chưa
+    DataSnapshot snapshot = (await databaseReference
+            .child('Reviews')
+            .orderByChild('hotel_id')
+            .equalTo(CURRENT_HOTEL)
+            .once())
+        .snapshot;
+    Map<dynamic, dynamic>? hotelData = snapshot.value as Map?;
+    if (hotelData != null) {
+      hotelData.forEach((key, value) {
+        listH.add(RatingHotel(
+            iid: value['iid'],
+            user_name: value['user_name'],
+            comment: value['review'],
+            rating: value['rating'],
+            user_image: value['user_image']));
+      });
+    }
+    return listH;
+  }
+
+  int getCountList(int countl) {
+    if (countl > 5) {
+      return 5;
+    } else {
+      return countl;
+    }
+  }
+
+  String subStringAddress(String address) {
+    if (address.length > 40) {
+      return '${address.substring(0, 40)}...';
+    } else {
+      return address;
+    }
   }
 
   String formatCurrencyVND(double amount) {

@@ -88,6 +88,7 @@ class MyFavouritePage extends StatelessWidget {
                     );
                   } else {
                     final FollowingItem item = value.followingList[index - 1];
+                    print(item.hotelPrice);
                     return Container(
                       margin: REdgeInsets.only(bottom: 15.h),
                       padding: REdgeInsets.all(10),
@@ -126,25 +127,14 @@ class MyFavouritePage extends StatelessWidget {
                               Row(
                                 children: [
                                   Text.rich(
-                                    textAlign: TextAlign.left,
                                     TextSpan(
-                                      text: formatCurrencyVND(
-                                          item.hotelPrice.toDouble()),
-                                      style: GoogleFonts.dmSans(
+                                      text:
+                                          '${formatCurrencyVND(item.hotelPrice.toDouble())} /Night',
+                                      style: GoogleFonts.montserrat(
                                         fontSize: 12.sp,
-                                        fontWeight: FontWeight.w700,
-                                        color: const Color(0xFFFFFFFF),
+                                        fontWeight: FontWeight.w500,
+                                        color: const Color(0xFFE2E4EA),
                                       ),
-                                      children: [
-                                        TextSpan(
-                                          text: '/Night',
-                                          style: GoogleFonts.montserrat(
-                                            fontSize: 12.sp,
-                                            fontWeight: FontWeight.w500,
-                                            color: const Color(0xFFE2E4EA),
-                                          ),
-                                        ),
-                                      ],
                                     ),
                                   ),
                                   SizedBox(width: 21.w),

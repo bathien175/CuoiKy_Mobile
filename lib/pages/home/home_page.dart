@@ -10,6 +10,7 @@ import 'package:homelyn/config/constants.dart';
 import 'package:homelyn/models/current_user.dart';
 import 'package:homelyn/widgets/notifications_badge.dart';
 import 'package:intl/intl.dart';
+import '../../models/current_hotel.dart';
 import '../../models/model_hotel.dart';
 import '../../utils/routes.dart';
 
@@ -45,7 +46,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   TextEditingController textControllor = TextEditingController();
-
+  List<String> listFind = [];
   @override
   void dispose() {
     // Clean up the controller when the widget is removed from the
@@ -65,34 +66,21 @@ class _HomePageState extends State<HomePage> {
     log("text field: ${textControllor.text}");
   }
 
-  Future<List<String>> fetchSimpleData() async {
-    List<String> hotelsList = [];
-
-    try {
-      final databaseReference = FirebaseDatabase.instance.reference();
-
-      DataSnapshot snapshot =
-          await databaseReference.child('hotels').once() as DataSnapshot;
-
-      Map<dynamic, dynamic>? data = snapshot.value as Map<dynamic, dynamic>?;
-
-      if (data != null) {
-        data.forEach((key, value) {
-          String? hotelName = value['hotel_name'] as String?;
-          if (hotelName != null) {
-            hotelsList.add(hotelName);
-          }
-        });
-      }
-    } catch (e) {
-      print('Error fetching data: $e');
+  // mocking a future
+  Future<List> fetchSimpleData() async {
+    // ignore: no_leading_underscores_for_local_identifiers
+    List _list = <dynamic>[];
+    // create a list from the text input of three items
+    // to mock a list of items from an http call
+    for (var item in listFind) {
+      _list.add(item);
     }
-
-    return hotelsList; // Return the hotelsList at the end of the function.
+    return _list;
   }
 
   // mocking a future
   Future<List<Hotel>> fetchDataRecomment() async {
+    listFind.clear();
     // ignore: deprecated_member_use
     final databaseReference = FirebaseDatabase.instance.reference();
     DataSnapshot snapshot =
@@ -101,13 +89,15 @@ class _HomePageState extends State<HomePage> {
     Map<dynamic, dynamic>? hotelData = snapshot.value as Map?;
     if (hotelData != null) {
       hotelData.forEach((key, item) {
+        listFind.add(item['hotel_id'] + ': ' + item['hotel_name']);
         hotels.add(
           Hotel(
               hotel_id: item['hotel_id'],
               hotel_name: item['hotel_name'],
               hotel_address: item['hotel_address'],
               hotel_city: item['hotel_city'],
-              hotel_rating: item['hotel_rating'],
+              hotel_rating: item['hotel_rating'].toDouble(),
+              count_rating: item['count_rating'],
               hotel_price: item['hotel_price'],
               hotel_image: item['hotel_image'],
               hotel_description: item['hotel_description']),
@@ -137,7 +127,8 @@ class _HomePageState extends State<HomePage> {
               hotel_name: item['hotel_name'],
               hotel_address: item['hotel_address'],
               hotel_city: item['hotel_city'],
-              hotel_rating: item['hotel_rating'],
+              hotel_rating: item['hotel_rating'].toDouble(),
+              count_rating: item['count_rating'],
               hotel_price: item['hotel_price'],
               hotel_image: item['hotel_image'],
               hotel_description: item['hotel_description']),
@@ -316,6 +307,17 @@ class _HomePageState extends State<HomePage> {
                         //chuyển form detail cho hotel
                         onTap: () {
                           CURRENT_HOTEL = hotels[index].hotel_id;
+                          CURRENT_HOTEL_NAME = hotels[index].hotel_name;
+                          CURRENT_HOTEL_ADDRESS = hotels[index].hotel_address;
+                          CURRENT_HOTEL_DESCRIPTION =
+                              hotels[index].hotel_description;
+                          CURRENT_HOTEL_IMAGE = hotels[index].hotel_image;
+                          CURRENT_HOTEL_CITY = hotels[index].hotel_city;
+                          CURRENT_HOTEL_PRICE = hotels[index].hotel_price;
+                          CURRENT_HOTEL_RATING =
+                              hotels[index].hotel_rating.toDouble();
+                          CURRENT_HOTEL_COUNT_RATING =
+                              hotels[index].count_rating;
                           Navigator.of(context)
                               .pushNamed(RouteGenerator.detailPage);
                         },
@@ -561,134 +563,121 @@ class _HomePageState extends State<HomePage> {
                           shrinkWrap: true,
                           scrollDirection: Axis.vertical,
                           physics: const BouncingScrollPhysics(),
-                          itemCount: 5,
+                          itemCount: hotels.length,
                           itemBuilder: (context, index) => InkWell(
-                                //chuyển form detail cho hotel
-                                onTap: () {
-                                  Navigator.of(context).pushNamed(
-                                      RouteGenerator.detailPage,
-                                      arguments: hotels[index].hotel_id);
-                                },
-                                child: Container(
-                                  margin: REdgeInsets.only(bottom: 15.h),
-                                  padding: REdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                      boxShadow: kDefaultBoxShadow,
-                                      color: Theme.of(context)
-                                          .inputDecorationTheme
-                                          .fillColor,
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(15.r))),
-                                  child: Row(
-                                    children: [
-                                      ClipRRect(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(10.r)),
-                                          child: Image.network(
-                                            hotels[index].hotel_image,
-                                            width: 76.w,
-                                            height: 76.h,
-                                            fit: BoxFit.fill,
-                                          )),
-                                      SizedBox(
-                                        width: 12.w,
-                                      ),
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            hotels[index].hotel_name,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .headlineSmall,
-                                            overflow: TextOverflow.ellipsis,
-                                            maxLines: 1,
-                                          ),
-                                          SizedBox(
-                                            width: 4.w,
-                                          ),
-                                          Text(
-                                            hotels[index].hotel_address,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodyMedium,
-                                            overflow: TextOverflow.ellipsis,
-                                            maxLines: 1,
-                                          ),
-                                          SizedBox(
-                                            width: 8.w,
-                                          ),
-                                          Row(
-                                            children: [
-                                              Text.rich(
-                                                textAlign: TextAlign.left,
-                                                TextSpan(
-                                                  children: [
-                                                    TextSpan(
-                                                      text: formatCurrencyVND(
-                                                          hotels[index]
-                                                              .hotel_price
-                                                              .toDouble()),
-                                                      style: GoogleFonts.dmSans(
-                                                        fontSize: 12.sp,
-                                                        fontWeight:
-                                                            FontWeight.w700,
-                                                        color: kBlueColor,
-                                                      ),
-                                                    ),
-                                                    TextSpan(
-                                                        text: '/Night',
-                                                        style: Theme.of(context)
-                                                            .textTheme
-                                                            .bodyMedium),
-                                                  ],
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                width: 21.w,
-                                              ),
-                                              Row(
-                                                children: [
-                                                  Icon(
-                                                    Icons.star,
-                                                    color: kYellowColor,
-                                                    size: 16.r,
-                                                  ),
-                                                  SizedBox(
-                                                    width: 5.w,
-                                                  ),
-                                                  Text.rich(
-                                                    textAlign: TextAlign.left,
-                                                    TextSpan(
-                                                      children: [
-                                                        TextSpan(
-                                                          text:
-                                                              '${hotels[index].hotel_rating} ',
-                                                          style:
-                                                              Theme.of(context)
-                                                                  .textTheme
-                                                                  .titleLarge,
-                                                        ),
-                                                        TextSpan(
-                                                            text: '0 Reviews)',
-                                                            style: Theme.of(
-                                                                    context)
-                                                                .textTheme
-                                                                .bodyMedium),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          )
-                                        ],
-                                      )
-                                    ],
-                                  ),
+                              //chuyển form detail cho hotel
+                              onTap: () {
+                                CURRENT_HOTEL = hotels[index].hotel_id;
+                                CURRENT_HOTEL_NAME = hotels[index].hotel_name;
+                                CURRENT_HOTEL_ADDRESS =
+                                    hotels[index].hotel_address;
+                                CURRENT_HOTEL_DESCRIPTION =
+                                    hotels[index].hotel_description;
+                                CURRENT_HOTEL_IMAGE = hotels[index].hotel_image;
+                                CURRENT_HOTEL_CITY = hotels[index].hotel_city;
+                                CURRENT_HOTEL_PRICE = hotels[index].hotel_price;
+                                CURRENT_HOTEL_RATING =
+                                    hotels[index].hotel_rating.toDouble();
+                                CURRENT_HOTEL_COUNT_RATING =
+                                    hotels[index].count_rating;
+                                Navigator.of(context)
+                                    .pushNamed(RouteGenerator.detailPage);
+                              },
+                              child: Container(
+                                margin: REdgeInsets.only(bottom: 15.h),
+                                padding: REdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  boxShadow: kDefaultBoxShadow,
+                                  color: Theme.of(context)
+                                      .inputDecorationTheme
+                                      .fillColor,
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(15.r)),
                                 ),
-                              ));
+                                child: Row(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(10.r)),
+                                      child: Image.network(
+                                        hotels[index].hotel_image,
+                                        width: 76.w,
+                                        height: 76.h,
+                                        fit: BoxFit.fill,
+                                      ),
+                                    ),
+                                    SizedBox(width: 12.w),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          hotels[index].hotel_name,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .headlineSmall,
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                        ),
+                                        SizedBox(width: 4.w),
+                                        Text(
+                                          "${hotels[index].hotel_address.substring(0, 35)}...",
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium,
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                        ),
+                                        SizedBox(width: 8.w),
+                                        Row(
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(10.r)),
+                                              child: Image.network(
+                                                hotels[index].hotel_image,
+                                                width: 76.w,
+                                                height: 76.h,
+                                                fit: BoxFit.fill,
+                                              ),
+                                            ),
+                                            SizedBox(width: 10.w),
+                                            Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  hotels[index].hotel_name,
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .headlineSmall,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  maxLines: 1,
+                                                ),
+                                                SizedBox(width: 2.w),
+                                                Text(
+                                                  hotels[index].hotel_address,
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .bodyMedium,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  maxLines: 1,
+                                                ),
+                                                SizedBox(width: 8.w),
+                                                const Row(
+                                                  children: [],
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              )));
                     }
                   },
                 ),

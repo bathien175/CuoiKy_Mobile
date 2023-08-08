@@ -318,8 +318,7 @@ class _LoginPageState extends State<LoginPage> {
           CURRENT_USER_NAME = userData['fullname'].toString();
           CURRENT_USER_IMAGE = userData['image'].toString();
           CURRENT_USER_PHONE = userData['phoneNumber'].toString();
-          CURRENT_USER_CITY = userData['city'].toString();
-          CURRENT_USER_ADDRESS = userData['address'].toString();
+          fetchUserData();
           Navigator.of(context).pushNamed(
             RouteGenerator.navigationPage,
           );
@@ -355,14 +354,11 @@ class _LoginPageState extends State<LoginPage> {
           if (snapshot.value != null) {
             // Nếu email đã tồn tại, báo đăng nhập thành công
             Fluttertoast.showToast(msg: "Đăng nhập thành công", toastLength: Toast.LENGTH_LONG, gravity: ToastGravity.BOTTOM, timeInSecForIosWeb: 1, textColor: Colors.black, fontSize: 16);
-            Map<dynamic, dynamic>? usersData = snapshot.value as Map?;
             CURRENT_USER_ID = userCredential.user!.uid;
             CURRENT_USER_NAME = displayName;
             CURRENT_USER_IMAGE = userCredential.user!.photoURL!;
-            usersData!.forEach((key, value) {
-              CURRENT_USER_CITY = value['city'].toString();
-              CURRENT_USER_ADDRESS = value['address'].toString();
-            });
+            // ignore: use_build_context_synchronously
+            fetchUserData();
             // ignore: use_build_context_synchronously
             Navigator.of(context).pushNamed(
               RouteGenerator.navigationPage,
@@ -373,9 +369,15 @@ class _LoginPageState extends State<LoginPage> {
               'uid': userCredential.user!.uid,
               'fullname': displayName,
               'email': email,
-              'image': userCredential.user!.photoURL
+              'image': userCredential.user!.photoURL,
+              'birthday': '',
+              'sex': '',
+              'address': '',
+              'city': '',
             });
             Fluttertoast.showToast(msg: "Tạo tài khoản thành công", toastLength: Toast.LENGTH_LONG, gravity: ToastGravity.BOTTOM, timeInSecForIosWeb: 1, textColor: Colors.black, fontSize: 16);
+            // ignore: use_build_context_synchronously
+            fetchUserData();
             // ignore: use_build_context_synchronously
             Navigator.of(context).pushNamed(
               RouteGenerator.navigationPage,
@@ -393,6 +395,28 @@ class _LoginPageState extends State<LoginPage> {
     } catch (e) {
       // Xử lý lỗi nếu có
       showToast('Đã xảy ra lỗi phía server');
+    }
+  }
+
+  Future<void> fetchUserData() async {
+    // ignore: deprecated_member_use
+    final databaseReference = FirebaseDatabase.instance.reference();
+
+    DataSnapshot snapshot = (await databaseReference.child('guests')
+        .orderByChild('uid')
+        .equalTo(CURRENT_USER_ID)
+        .once()).snapshot;
+    Map<dynamic, dynamic>? usersData = snapshot.value as Map?;
+    if(usersData!=null){
+      usersData.forEach((key, userData) {
+          CURRENT_USER_EMAIL = userData['email'].toString();
+          CURRENT_USER_SEX = userData['sex'].toString();
+          CURRENT_USER_BIRTHDAY = userData['birthday'].toString();
+          CURRENT_USER_ADDRESS = userData['address'].toString();
+          CURRENT_USER_CITY = userData['city'].toString();
+      });
+    }else {
+      showToast("Không thể lấy thông tin người dùng!");
     }
   }
 

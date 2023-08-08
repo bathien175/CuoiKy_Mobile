@@ -24,9 +24,22 @@ class _MyProfilePageState extends State<MyProfilePage> {
   final String initialValue = CURRENT_USER_PHONE;
 
   final TextEditingController _fullNameController =
-  TextEditingController(text: CURRENT_USER_NAME_TEMP);
+  TextEditingController(text: CURRENT_USER_NAME);
+
+  final TextEditingController _birthdayController =
+  TextEditingController(text: CURRENT_USER_BIRTHDAY);
+
+  final TextEditingController _sexController =
+  TextEditingController(text: CURRENT_USER_SEX);
+
+  final TextEditingController _addressController =
+  TextEditingController(text: CURRENT_USER_ADDRESS);
+
+  final TextEditingController _cityController =
+  TextEditingController(text: CURRENT_USER_CITY);
 
   bool showPhoneField = false;
+  late String selectedGender;
 
   @override
   void initState() {
@@ -61,6 +74,10 @@ class _MyProfilePageState extends State<MyProfilePage> {
                           Navigator.pop(context);
                           CURRENT_USER_IMAGE_TEMP = "";
                           CURRENT_USER_NAME_TEMP = "";
+                          CURRENT_USER_BIRTHDAY_TEMP = "";
+                          CURRENT_USER_SEX_TEMP = "";
+                          CURRENT_USER_ADDRESS_TEMP = "";
+                          CURRENT_USER_CITY_TEMP = "";
                         },
                         child: Icon(
                           Icons.arrow_back,
@@ -121,7 +138,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                       : SvgPicture.asset('assets/svg/user_dark_icon.svg',),
                   initialValue: CURRENT_USER_NAME,
                   onChanged: (value) {
-                    if (value.trim().isEmpty) {
+                    if (value.isEmpty) {
                       _fullNameController.text = CURRENT_USER_NAME;
                     } else {
                       _fullNameController.text = value;
@@ -159,7 +176,123 @@ class _MyProfilePageState extends State<MyProfilePage> {
                   initialValue: CURRENT_USER_PHONE.isEmpty ? CURRENT_USER_EMAIL : CURRENT_USER_PHONE,
                 ),
                 SizedBox(
-                  height: 200.h,
+                  height: 20.h,
+                ),
+                Text(
+                  'Gender',
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineMedium!
+                      .copyWith(fontWeight: FontWeight.w500),
+                ),
+                SizedBox(
+                  height: 10.h,
+                ),
+                CTextFormField(
+                  hintText: 'Select your gender',
+                  textInputAction: TextInputAction.next,
+                  keyboardType: TextInputType.multiline,
+                  prefixIcon: Theme.of(context).brightness == Brightness.light
+                      ? SvgPicture.asset('assets/svg/sex_icon_light.svg',)
+                      : SvgPicture.asset('assets/svg/sex_icon_dark.svg',),
+                  initialValue: CURRENT_USER_SEX,
+                  onChanged: (value) {
+                    if (value.isEmpty) {
+                      _sexController.text = CURRENT_USER_SEX;
+                    } else {
+                      _sexController.text = value;
+                    }
+                  },
+                ),
+                SizedBox(
+                  height: 20.h,
+                ),
+                Text(
+                  'Birthday',
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineMedium!
+                      .copyWith(fontWeight: FontWeight.w500),
+                ),
+                SizedBox(
+                  height: 10.h,
+                ),
+                CTextFormField(
+                  hintText: 'Select your birthday',
+                  textInputAction: TextInputAction.next,
+                  keyboardType: TextInputType.datetime,
+                  prefixIcon: Theme.of(context).brightness == Brightness.light
+                      ? SvgPicture.asset('assets/svg/birthday_icon_light.svg',)
+                      : SvgPicture.asset('assets/svg/birthday_icon_dark.svg',),
+                  initialValue: CURRENT_USER_BIRTHDAY,
+                  onChanged: (value) {
+                    if (value.isEmpty) {
+                      _birthdayController.text = CURRENT_USER_BIRTHDAY;
+                    } else {
+                      _birthdayController.text = value;
+                    }
+                  },
+                ),
+                SizedBox(
+                  height: 20.h,
+                ),
+                Text(
+                  'Address',
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineMedium!
+                      .copyWith(fontWeight: FontWeight.w500),
+                ),
+                SizedBox(
+                  height: 10.h,
+                ),
+                CTextFormField(
+                  hintText: 'Enter your address',
+                  textInputAction: TextInputAction.next,
+                  keyboardType: TextInputType.streetAddress,
+                  prefixIcon: Theme.of(context).brightness == Brightness.light
+                      ? SvgPicture.asset('assets/svg/address_icon_light.svg',)
+                      : SvgPicture.asset('assets/svg/address_icon_dark.svg',),
+                  initialValue: CURRENT_USER_ADDRESS,
+                  onChanged: (value) {
+                    if (value.isEmpty) {
+                      _addressController.text = CURRENT_USER_ADDRESS;
+                    } else {
+                      _addressController.text = value;
+                    }
+                  },
+                ),
+                SizedBox(
+                  height: 20.h,
+                ),
+                Text(
+                  'City',
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineMedium!
+                      .copyWith(fontWeight: FontWeight.w500),
+                ),
+                SizedBox(
+                  height: 10.h,
+                ),
+                CTextFormField(
+                  hintText: 'Enter your city',
+                  textInputAction: TextInputAction.next,
+                  keyboardType: TextInputType.text,
+                  prefixIcon: Theme.of(context).brightness == Brightness.light
+                      ? SvgPicture.asset('assets/svg/city_icon_light.svg',)
+                      : SvgPicture.asset('assets/svg/city_icon_dark.svg',),
+                  initialValue: CURRENT_USER_CITY,
+                  onChanged: (value) {
+                    if (value.isEmpty) {
+                      _cityController.text = CURRENT_USER_CITY;
+                    } else {
+                      _cityController.text = value;
+                    }
+                  },
+                ),
+                SizedBox(
+                  height: 50.h,
                 ),
                 CElevatedButton(
                     child: const Text('Save Changes'),
@@ -195,10 +328,31 @@ class _MyProfilePageState extends State<MyProfilePage> {
 
   Future<void> _updateUserProfile() async {
     String fullName = _fullNameController.text;
+    String sex = _sexController.text;
+    String birthday = _birthdayController.text;
+    String address = _addressController.text;
+    String city = _cityController.text;
     if (fullName.isEmpty) {
       showToast('Please enter your full name.');
       return;
     }
+    if (sex.isEmpty) {
+      showToast('Please enter your gender.');
+      return;
+    }
+    if (birthday.isEmpty) {
+      showToast('Please enter your birthday.');
+      return;
+    }
+    if (address.isEmpty) {
+      showToast('Please enter your address.');
+      return;
+    }
+    if (city.isEmpty) {
+      showToast('Please enter your city.');
+      return;
+    }
+
     try {
       final databaseReference = FirebaseDatabase.instance;
       if (CURRENT_USER_ID.isNotEmpty) {
@@ -213,12 +367,20 @@ class _MyProfilePageState extends State<MyProfilePage> {
             .update({
               'fullname': fullName,
               'image': imageUrl,
+              'sex' : sex,
+              'birthday' : birthday,
+              'address' : address,
+              'city' :  city
             });
 
         showToast('Profile updated successfully!');
         setState(() {
           CURRENT_USER_IMAGE = imageUrl;
           CURRENT_USER_NAME = fullName;
+          CURRENT_USER_SEX = sex;
+          CURRENT_USER_BIRTHDAY = birthday;
+          CURRENT_USER_ADDRESS = address;
+          CURRENT_USER_CITY = city;
         });
       } else {
         showToast('User ID is empty. Cannot update the profile.');
