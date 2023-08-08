@@ -14,7 +14,7 @@ List<OnbordingContent> contents = [
   ),
   OnbordingContent(
     title: 'Group 8 - mr.Truyền',
-    image: 'assets/images/thaytruyen.png',
+    image: 'assets/images/thaytruyenhehe.jpg',
     discription: "As a final topic in the mobile cross-platform course"
   ),
   OnbordingContent(
