@@ -34,6 +34,7 @@ class _ReviewsPageState extends State<ReviewsPage> {
   double _rating = 0;
   String _review = "";
   int _visibleItemCount = 5;
+  // ignore: non_constant_identifier_names
   int list_range = 0;
 
   @override
@@ -283,7 +284,6 @@ class _ReviewsPageState extends State<ReviewsPage> {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const CircularProgressIndicator(); // Hiển thị tiến trình đang chờ dữ liệu
                       } else if (snapshot.hasError) {
-                        print(snapshot.error);
                         return const Text('Đã xảy ra lỗi'); // Hiển thị lỗi nếu có
                       } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                         return const Text('Không có dữ liệu'); // Hiển thị nếu không có dữ liệu

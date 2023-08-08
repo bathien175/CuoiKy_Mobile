@@ -9,6 +9,7 @@ import 'package:homelyn/config/constants.dart';
 import 'package:homelyn/models/current_user.dart';
 import 'package:homelyn/widgets/notifications_badge.dart';
 import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../models/current_hotel.dart';
 import '../../models/model_hotel.dart';
 import '../../utils/routes.dart';
@@ -31,15 +32,6 @@ class _HomePageState extends State<HomePage> {
 
   _printLatestValue() {
     log("text field: ${textControllor.text}");
-  }
-
-  @override
-  void dispose() {
-    // Clean up the controller when the widget is removed from the
-    // widget tree.
-    textControllor.dispose();
-
-    super.dispose();
   }
 
   // mocking a future
@@ -127,39 +119,41 @@ class _HomePageState extends State<HomePage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      // width: 200.w,
-                      padding: REdgeInsets.all(14),
-                      decoration: BoxDecoration(
+                    GestureDetector(
+                      onTap: () async {
+                        // Xử lý sự kiện khi container được chạm vào ở đây
+                          Navigator.of(context).pushNamed(
+                              RouteGenerator.googleMapPage);
+                      },
+                      child: Container(
+                        // Các thuộc tính khác của container ở đây
+                        width: 200.w,
+                        padding: REdgeInsets.all(14),
+                        decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(30.r),
-                          color:
-                              Theme.of(context).inputDecorationTheme.fillColor,
-                          boxShadow: kDefaultBoxShadow),
-                      child: Row(
-                        children: [
-                          Theme.of(context).brightness == Brightness.light
-                              ? SvgPicture.asset(
-                                  'assets/svg/location_icon_light.svg')
-                              : SvgPicture.asset(
-                                  'assets/svg/location_icon_light.svg'),
-                          SizedBox(
-                            width: 10.w,
-                          ),
-                          Text(
-                            'Purwokerto, IND',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge!
-                                .copyWith(fontWeight: FontWeight.w500),
-                          ),
-                          SizedBox(
-                            width: 20.w,
-                          ),
-                          const Icon(
-                            Icons.keyboard_arrow_down,
-                            color: Color(0xFF3F6DF6),
-                          ),
-                        ],
+                          color: Theme.of(context).inputDecorationTheme.fillColor,
+                          boxShadow: kDefaultBoxShadow,
+                        ),
+                        child: Row(
+                          children: [
+                            Theme.of(context).brightness == Brightness.light
+                                ? SvgPicture.asset('assets/svg/location_icon_light.svg')
+                                : SvgPicture.asset('assets/svg/location_icon_light.svg'),
+                            SizedBox(width: 10.w),
+                            Text(
+                              'Click me!',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge!
+                                  .copyWith(fontWeight: FontWeight.w500),
+                            ),
+                            SizedBox(width: 20.w),
+                            const Icon(
+                              Icons.keyboard_arrow_down,
+                              color: Color(0xFF3F6DF6),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     Container(
@@ -649,5 +643,15 @@ class _HomePageState extends State<HomePage> {
       symbol: 'đ',
     );
     return formatter.format(amount);
+  }
+
+  Future<bool> requestPermissions() async {
+    // Yêu cầu quyền GPS
+    var status = await Permission.location.request();
+    if (status.isDenied) {
+      // Xử lý khi quyền GPS bị từ chối
+      return false;
+    }
+    return true;
   }
 }

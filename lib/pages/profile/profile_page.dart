@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -16,11 +17,11 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   TextEditingController textControllor = TextEditingController();
-
   @override
   void initState() {
     super.initState();
     textControllor.addListener(_printLatestValue);
+    loadProfileUser();
   }
 
   _printLatestValue() {
@@ -34,19 +35,6 @@ class _ProfilePageState extends State<ProfilePage> {
     textControllor.dispose();
 
     super.dispose();
-  }
-
-  // mocking a future
-  Future<List> fetchSimpleData() async {
-    await Future.delayed(const Duration(milliseconds: 2000));
-    // ignore: no_leading_underscores_for_local_identifiers
-    List _list = <dynamic>[];
-    // create a list from the text input of three items
-    // to mock a list of items from an http call
-    _list.add('Test' ' Item 1');
-    _list.add('yes' ' welcome');
-    _list.add('Test' ' Item 3');
-    return _list;
   }
 
   @override
@@ -130,7 +118,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       Column(
                         children: [
                           Text(
-                            '26',
+                            CURRENT_USER_TRANS.toString(),
                             style: Theme.of(context)
                                 .textTheme
                                 // ignore: deprecated_member_use
@@ -141,7 +129,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             height: 6.h,
                           ),
                           Text(
-                            'Transaction',
+                            'Transactions',
                             // ignore: deprecated_member_use
                             style: Theme.of(context).textTheme.bodyText1,
                           ),
@@ -150,7 +138,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       Column(
                         children: [
                           Text(
-                            '12',
+                            CURRENT_USER_REVIEWS.toString(),
                             style: Theme.of(context)
                                 .textTheme
                                 // ignore: deprecated_member_use
@@ -161,7 +149,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             height: 6.h,
                           ),
                           Text(
-                            'Review',
+                            'Reviews',
                             // ignore: deprecated_member_use
                             style: Theme.of(context).textTheme.bodyText1,
                           ),
@@ -170,7 +158,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       Column(
                         children: [
                           Text(
-                            '4',
+                            CURRENT_USER_FAVOURITES.toString(),
                             style: Theme.of(context)
                                 .textTheme
                                 // ignore: deprecated_member_use
@@ -181,7 +169,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             height: 6.h,
                           ),
                           Text(
-                            'Bookings',
+                            'Favourites',
                             // ignore: deprecated_member_use
                             style: Theme.of(context).textTheme.bodyText1,
                           ),
@@ -328,5 +316,40 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           )
         ]));
+  }
+
+  Future<void> loadProfileUser() async {
+    int trans = 0;
+    int reviews = 0;
+    int favourites = 0;
+    // ignore: deprecated_member_use
+    final databaseReference = FirebaseDatabase.instance.reference();
+    DataSnapshot snapshotTrans = (await databaseReference.child('Bookings').orderByChild('user_id').equalTo(CURRENT_USER_ID).once()).snapshot;
+    Map<dynamic, dynamic>? transData = snapshotTrans.value as Map?;
+    if(transData!=null){
+      transData.forEach((key, value) {
+        trans++;
+      });
+    }
+
+    DataSnapshot snapshotReviews = (await databaseReference.child('Reviews').orderByChild('user_id').equalTo(CURRENT_USER_ID).once()).snapshot;
+    Map<dynamic, dynamic>? reviewsData = snapshotReviews.value as Map?;
+    if(reviewsData!=null){
+      reviewsData.forEach((key, value) {
+        reviews++;
+      });
+    }
+
+    DataSnapshot snapshotFavourites = (await databaseReference.child('Favourites').orderByChild('user_id').equalTo(CURRENT_USER_ID).once()).snapshot;
+    Map<dynamic, dynamic>? reviewsFavourties = snapshotFavourites.value as Map?;
+    if(reviewsFavourties!=null){
+      reviewsFavourties.forEach((key, value) {
+        favourites++;
+      });
+    }
+
+    CURRENT_USER_TRANS = trans;
+    CURRENT_USER_REVIEWS = reviews;
+    CURRENT_USER_FAVOURITES = favourites;
   }
 }

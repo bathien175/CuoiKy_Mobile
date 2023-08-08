@@ -6,7 +6,7 @@ import 'package:homelyn/config/constants.dart';
 import 'package:homelyn/pages/home/home_page.dart';
 import 'package:homelyn/pages/messages/messages_empty_state_page.dart';
 import 'package:homelyn/pages/profile/profile_page.dart';
-import 'package:homelyn/pages/search/search_page.dart';
+import '../search/search_typing_page.dart';
 
 class NavigationPage extends StatefulWidget {
   const NavigationPage({Key? key}) : super(key: key);
@@ -20,7 +20,7 @@ class _NavigationPageState extends State<NavigationPage> {
 
   List<Widget> get _children => [
         const HomePage(),
-        const SearchPage(),
+        const SearchTypingPage(),
         const MessagesEmptyStatePage(),
         const ProfilePage(),
       ];

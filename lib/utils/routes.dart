@@ -5,6 +5,7 @@ import 'package:homelyn/pages/auth/login_page.dart';
 import 'package:homelyn/pages/auth/verify_account_page.dart';
 import 'package:homelyn/pages/home/checkout_page.dart';
 import 'package:homelyn/pages/home/detail_page.dart';
+import 'package:homelyn/pages/home/googleMap.dart';
 import 'package:homelyn/pages/home/location_details_page.dart';
 import 'package:homelyn/pages/home/notification_page.dart';
 import 'package:homelyn/pages/home/reviews_page.dart';
@@ -64,6 +65,7 @@ class RouteGenerator {
   static const String verifyAccountPage = 'verifyAccountPage';
   static const String welcomePage = 'welcomePage';
   static const String changePasswordPage = 'changePasswordPage';
+  static const String googleMapPage = 'googleMapPage';
   // static const String splash = '/';
 
   RouteGenerator._();
@@ -128,6 +130,8 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => const SearchByMapPage());
       case selectDatesPage:
         return MaterialPageRoute(builder: (_) => SelectDatesPage());
+      case googleMapPage:
+        return MaterialPageRoute(builder: (_) => const MyLocationScreen());
       case transactionHistoryPage:
         return MaterialPageRoute(
             builder: (_) => const TransactionHistoryPage());

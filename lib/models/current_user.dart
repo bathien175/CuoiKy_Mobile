@@ -15,4 +15,7 @@ String CURRENT_USER_CITY = "";
 String CURRENT_USER_CITY_TEMP = "";
 String CURRENT_USER_EMAIL = "";
 String CURRENT_USER_PHONE =  "";
+int CURRENT_USER_TRANS = 0;
+int CURRENT_USER_REVIEWS = 0;
+int CURRENT_USER_FAVOURITES = 0;
 const String DEFAULT_IMAGE = "https://firebasestorage.googleapis.com/v0/b/hotelbooking-4633e.appspot.com/o/avatar-370-456322.png?alt=media&token=d29ff5e0-ca24-4f3a-a8e7-be113fffeb5a";

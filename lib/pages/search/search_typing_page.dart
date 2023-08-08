@@ -139,16 +139,16 @@ class _SearchTypingPageState extends State<SearchTypingPage> {
                 ListTile(
                   onTap: () {
                     Navigator.of(context)
-                        .pushNamed(RouteGenerator.searchListPage);
+                        .pushNamed(RouteGenerator.searchByMapPage);
                   },
                   contentPadding: REdgeInsets.all(0),
                   leading: SvgPicture.asset('assets/svg/location.svg'),
                   title: Text(
-                    'Dominic Hotel and Resort',
+                    'Adela Boutique Hotel',
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   subtitle: Text(
-                    'Purwokerto, Kawung Carang, Jl Kenari 90',
+                    '10 An Thượng 36, My An, Ngũ Hành Sơn, Mỹ An, Ngũ Hành Sơn, Đà Nẵng',
                     style: Theme.of(context).textTheme.bodyMedium,
                     maxLines: 1,
                   ),
@@ -158,11 +158,11 @@ class _SearchTypingPageState extends State<SearchTypingPage> {
                   contentPadding: REdgeInsets.all(0),
                   leading: SvgPicture.asset('assets/svg/location.svg'),
                   title: Text(
-                    'Aston Hotel',
+                    'Annata Beach Hotel',
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   subtitle: Text(
-                    'Purwokerto Utara, Beji, Jl Pramuka 12',
+                    '165 Thùy Vân, Thắng Tam, Thành phố Vũng Tàu, Bà Rịa - Vũng Tàu',
                     style: Theme.of(context).textTheme.bodyMedium,
                     maxLines: 1,
                   ),
@@ -172,11 +172,11 @@ class _SearchTypingPageState extends State<SearchTypingPage> {
                   contentPadding: REdgeInsets.all(0),
                   leading: SvgPicture.asset('assets/svg/location.svg'),
                   title: Text(
-                    'Luminaire Hotel',
+                    'Classy Boutique Hotel',
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   subtitle: Text(
-                    'Purwokerto Selatan, Sokaraja, Jl Ahmad Yani 23',
+                    '21 Hàng Cá, Hàng Đào, Quận Hoàn Kiếm, Hà Nội',
                     style: Theme.of(context).textTheme.bodyMedium,
                     maxLines: 1,
                   ),

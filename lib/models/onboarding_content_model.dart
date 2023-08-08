@@ -13,13 +13,23 @@ List<OnbordingContent> contents = [
     discription: "Discover hundreds of hotels that spread across the world for you "
   ),
   OnbordingContent(
-    title: 'Performed by group of 8',
-    image: 'assets/images/onboarding_image2.png',
+    title: 'Group 8 - mr.Truyền',
+    image: 'assets/images/thaytruyen.png',
     discription: "As a final topic in the mobile cross-platform course"
   ),
   OnbordingContent(
-    title: 'These are team members',
-    image: 'assets/images/onboarding_image3.png',
-    discription: "Bá Thiện, Quang Huy, Tuấn Kiệt, Văn Trung, Tử Đang, Tiến Dũng"
+      title: 'These are team members',
+      image: 'assets/images/kietdung.jpg',
+      discription: "Tiến Dũng và Tuấn Kiệt"
+  ),
+  OnbordingContent(
+      title: 'These are team members',
+      image: 'assets/images/trungdang.jpg',
+      discription: "Văn Trung, Tử Đang"
+  ),
+  OnbordingContent(
+      title: 'These are team members',
+      image: 'assets/images/huythien.jpg',
+      discription: "Quang Huy, Bá Thiện - Leader"
   ),
 ];

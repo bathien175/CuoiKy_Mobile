@@ -17,6 +17,7 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+
   bool valueFalse = false;
   bool valueTrue = false;
   bool isDarkMode = false;
@@ -43,7 +44,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           shape: BoxShape.circle),
                       child: InkWell(
                         onTap: () {
-                          Navigator.of(context).pushNamed(RouteGenerator.navigationPage);
+                          Navigator.pop(context);
                         },
                         child: Icon(
                           Icons.arrow_back,
@@ -321,4 +322,7 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
     );
   }
+
+
+
 }

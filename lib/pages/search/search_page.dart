@@ -31,15 +31,6 @@ class _SearchPageState extends State<SearchPage> {
     log("text field: ${textControllor.text}");
   }
 
-  @override
-  void dispose() {
-    // Clean up the controller when the widget is removed from the
-    // widget tree.
-    textControllor.dispose();
-
-    super.dispose();
-  }
-
   // mocking a future
   Future<List> fetchSimpleData() async {
     await Future.delayed(const Duration(milliseconds: 2000));

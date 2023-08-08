@@ -1,13 +1,12 @@
-import 'dart:async';
-
+// ignore_for_file: file_names
+import 'package:google_maps_webservice/directions.dart' as google_directions;
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:homelyn/components/search_text_field.dart';
-
-import '../../config/constants.dart';
+import 'package:geocoding/geocoding.dart' as geocoding;
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_webservice/distance.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SearchByMapPage extends StatefulWidget {
   const SearchByMapPage({super.key});
@@ -17,220 +16,247 @@ class SearchByMapPage extends StatefulWidget {
 }
 
 class _SearchByMapPageState extends State<SearchByMapPage> {
-  BitmapDescriptor markerIcon = BitmapDescriptor.defaultMarker;
-  final Completer<GoogleMapController> _controller = Completer();
-  LatLng initialLocation = const LatLng(10.895618, 106.610761);
-
-  TextEditingController textControllor = TextEditingController();
+  String _currentAddress = 'Fetching address...';
+  LatLng _currentLatLng = const LatLng(0, 0);
+  BitmapDescriptor _currentLocationIcon = BitmapDescriptor.defaultMarker;
+  BitmapDescriptor _hotelIcon = BitmapDescriptor.defaultMarker;
+  GoogleMapController? _mapController;
+  LatLng _hotelLatLng = const LatLng(0, 0); // Tọa độ khách sạn
+  String hotelAddress = "19C Bùi Thị Xuân, phường Bến Thành, Thành phố Hồ Chí Minh";
+   List<Polyline> _polyLines = [];
   @override
   void initState() {
-    addCustomIcon;
     super.initState();
-  }
-
-  void addCustomIcon() {
-    BitmapDescriptor.fromAssetImage(
-            const ImageConfiguration(), "assets/location_marker_icon.png")
-        .then((icon) {
-      setState(() {
-        markerIcon = icon;
-      });
-    });
+    _getCurrentLocation();
+    _getHotelLocation();
+    _drawRoute();
+    _loadIcons();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Hotel Location'),
+      ),
       body: Stack(
         children: [
-          Positioned(
-            child: GoogleMap(
-              initialCameraPosition: CameraPosition(
-                target: initialLocation,
-                zoom: 15,
-              ),
-              onMapCreated: (controller) {
-                _controller.complete(controller);
-              },
-              markers: {
-                Marker(
-                    markerId: const MarkerId("1"),
-                    position: initialLocation,
-                    draggable: true,
-                    onDragEnd: (value) {},
-                    icon: markerIcon),
-              },
-              // circles: {
-              //   Circle(
-              //     circleId: CircleId("2"),
-              //      center: initialLocation,
-              //      radius: 450,
-              //      strokeWidth: 0,
-              //      fillColor: Color(0xFF9FB6FA).withOpacity(0.2)
-              //     )
-              // },
+          GoogleMap(
+            myLocationEnabled: true,
+            initialCameraPosition: CameraPosition(
+              target: _currentLatLng,
+              zoom: 15.0,
             ),
+            markers: {
+          Marker(
+          markerId: const MarkerId('current_location_marker'),
+          position: _currentLatLng,
+          icon: _currentLocationIcon,
+          infoWindow: InfoWindow(title: 'Current Location', snippet: _currentAddress),
+          ),
+
+          Marker(
+                markerId: const MarkerId('hotel_marker'),
+                position: _hotelLatLng,
+                icon: _hotelIcon,
+                infoWindow: InfoWindow(title: 'Hotel', snippet: hotelAddress),
+                onTap: () {
+                  _navigateToHotel();
+                },
+              ),
+            },
+            polylines: _polyLines.toSet(),
+            onMapCreated: (controller) {
+              setState(() {
+                _mapController = controller;
+                print(_mapController.toString());
+              });
+              _drawRoute(); // Draw the route when the map is ready
+            },
           ),
           Positioned(
-              top: 30.h,
-              right: 24.w,
-              left: 24.w,
-              child: Column(
-                children: [
-                  SizedBox(
-                    width: double.infinity,
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.all(13.r),
-                          decoration: BoxDecoration(
-                              boxShadow: kDefaultBoxShadow,
-                              color: Theme.of(context)
-                                  .inputDecorationTheme
-                                  .fillColor,
-                              shape: BoxShape.circle),
-                          child: InkWell(
-                            onTap: () {
-                              Navigator.pop(context);
-                            },
-                            child: Icon(
-                              Icons.arrow_back,
-                              color: Theme.of(context)
-                                  .appBarTheme
-                                  .iconTheme!
-                                  .color,
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          width: 12.w,
-                        ),
-                        Expanded(
-                            child: SearchTextField(
-                          textControllor: textControllor,
-                          label: 'Search location',
-                          hintText: 'Search location',
-                          future: () {},
-                          prefixIcon:
-                              Theme.of(context).brightness == Brightness.light
-                                  ? SvgPicture.asset(
-                                      'assets/svg/search_icon_light.svg')
-                                  : SvgPicture.asset(
-                                      'assets/svg/search_icon_light.svg'),
-                          suffixIcon:
-                              Theme.of(context).brightness == Brightness.light
-                                  ? SvgPicture.asset(
-                                      'assets/svg/map_search_icon_light.svg')
-                                  : SvgPicture.asset(
-                                      'assets/svg/map_search_icon_dark.svg'),
-                        ))
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    height: 530.h,
-                  ),
-                  Container(
-                    padding: REdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                        boxShadow: kDefaultBoxShadow,
-                        color: Theme.of(context).inputDecorationTheme.fillColor,
-                        borderRadius: BorderRadius.all(Radius.circular(15.r))),
-                    child: Row(
-                      children: [
-                        ClipRRect(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(10.r)),
-                            child: Image.asset(
-                              'assets/images/hotel_image1.png',
-                              width: 76.w,
-                              height: 76.h,
-                              fit: BoxFit.fill,
-                            )),
-                        SizedBox(
-                          width: 12.w,
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Hyatt Washington Hotel',
-                              style: Theme.of(context).textTheme.headlineSmall,
-                            ),
-                            SizedBox(
-                              width: 4.w,
-                            ),
-                            Text('Purwokerto, Glempang',
-                                style: Theme.of(context).textTheme.bodyMedium),
-                            SizedBox(
-                              width: 8.w,
-                            ),
-                            Row(
-                              children: [
-                                Text.rich(
-                                  textAlign: TextAlign.left,
-                                  TextSpan(
-                                    children: [
-                                      TextSpan(
-                                        text: '\$38',
-                                        style: GoogleFonts.dmSans(
-                                          fontSize: 12.sp,
-                                          fontWeight: FontWeight.w700,
-                                          color: kBlueColor,
-                                        ),
-                                      ),
-                                      TextSpan(
-                                          text: '/Night',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 21.w,
-                                ),
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.star,
-                                      color: kYellowColor,
-                                      size: 16.r,
-                                    ),
-                                    SizedBox(
-                                      width: 5.w,
-                                    ),
-                                    Text.rich(
-                                      textAlign: TextAlign.left,
-                                      TextSpan(
-                                        children: [
-                                          TextSpan(
-                                            text: '4.7 ',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .titleLarge,
-                                          ),
-                                          TextSpan(
-                                              text: '186 Reviews)',
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .bodyMedium),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            )
-                          ],
-                        )
-                      ],
-                    ),
-                  ),
-                ],
-              )),
+            bottom: 16.0,
+            left: 16.0,
+            child: Container(
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: Text(_currentAddress),
+            ),
+          ),
         ],
       ),
     );
   }
+
+  Future<void> _getCurrentLocation() async {
+    try {
+      // Yêu cầu quyền truy cập vị trí từ người dùng trước khi lấy vị trí
+      await _requestLocationPermission();
+
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      List<geocoding.Placemark> placemarks = await geocoding.placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      if (placemarks.isNotEmpty) {
+        geocoding.Placemark placemark = placemarks.first;
+        String address = "${placemark.name}, ${placemark.locality}, ${placemark.country}";
+        LatLng latLng = LatLng(position.latitude, position.longitude);
+        setState(() {
+          _currentAddress = address;
+          _currentLatLng = latLng;
+        });
+        _mapController?.animateCamera(CameraUpdate.newLatLng(_currentLatLng));
+      }
+    } catch (e) {
+      setState(() {
+        _currentAddress = 'Error getting location';
+      });
+    }
+  }
+
+  Future<void> _requestLocationPermission() async {
+    final PermissionStatus status = await Permission.location.request();
+    if (!status.isGranted) {
+      // Xử lý khi người dùng từ chối cấp quyền truy cập vị trí
+      // ignore: use_build_context_synchronously
+      Navigator.pop(context);
+    }
+  }
+
+  Future<void> _getHotelLocation() async {
+    List<geocoding.Location> locations = await geocoding.locationFromAddress(hotelAddress);
+    if (locations.isNotEmpty) {
+      geocoding.Location location = locations.first;
+      LatLng hotelLatLng = LatLng(location.latitude, location.longitude);
+      setState(() {
+        _hotelLatLng = hotelLatLng;
+      });
+    }
+  }
+
+  Future<BitmapDescriptor> getMarkerIcon(String assetName) async {
+    final imageConfig = createLocalImageConfiguration(context);
+    final BitmapDescriptor bitmapDescriptor =
+    await BitmapDescriptor.fromAssetImage(imageConfig, assetName);
+    return bitmapDescriptor;
+  }
+  void _navigateToHotel() async {
+    String origin = "${_currentLatLng.latitude},${_currentLatLng.longitude}";
+    String destination = "${_hotelLatLng.latitude},${_hotelLatLng.longitude}";
+    String url =
+        "https://www.google.com/maps/dir/?api=1&origin=$origin&destination=$destination&travelmode=driving";
+
+    // ignore: deprecated_member_use
+    if (await canLaunch(url)) {
+      // ignore: deprecated_member_use
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
+  Future<void> _loadIcons() async {
+    final imageConfig = createLocalImageConfiguration(context);
+
+    _currentLocationIcon = await BitmapDescriptor.fromAssetImage(
+      imageConfig,
+      'assets/location_marker_icon.png',
+    );
+
+    _hotelIcon = await BitmapDescriptor.fromAssetImage(
+      imageConfig,
+      'assets/hotel_marker_icon.png',
+    );
+  }
+  Future<void> _drawRoute() async {
+    final google_directions.GoogleMapsDirections directionsService = google_directions.GoogleMapsDirections(
+      apiKey: 'AIzaSyCBPpJKvfbdwB6OL9yCsIUeQGFKEcydB3Y', // Thay YOUR_GOOGLE_MAPS_API_KEY bằng khóa API của bạn
+    );
+
+    final google_directions.DirectionsResponse response = await directionsService.directions(
+      google_directions.Location(
+        lat: _currentLatLng.latitude,
+        lng: _currentLatLng.longitude,
+      ),
+      google_directions.Location(
+        lat: _hotelLatLng.latitude,
+        lng: _hotelLatLng.longitude,
+      ),
+      travelMode: google_directions.TravelMode.driving,
+    );
+
+    if (response.status == GoogleResponseStatus.okay) {
+      final List<LatLng> routePoints = decodePolyline(response.routes[0].overviewPolyline.points);
+      final LatLngBounds routeBounds = LatLngBounds(
+        southwest: LatLng(
+          response.routes[0].bounds.southwest.lat,
+          response.routes[0].bounds.southwest.lng,
+        ),
+        northeast: LatLng(
+          response.routes[0].bounds.northeast.lat,
+          response.routes[0].bounds.northeast.lng,
+        ),
+      );
+      _mapController?.animateCamera(CameraUpdate.newLatLngBounds(routeBounds, 100.0));
+
+      setState(() {
+        _polyLines.add(Polyline(
+          polylineId: const PolylineId('route'),
+          points: routePoints,
+          color: Colors.blue,
+          patterns: [
+            PatternItem.dash(20.0),
+            PatternItem.gap(10)
+          ],
+          width: 3,
+        ));
+      });
+    }
+  }
+
+  List<LatLng> decodePolyline(String encoded) {
+    List<LatLng> points = [];
+    int index = 0;
+    int len = encoded.length;
+    int lat = 0;
+    int lng = 0;
+
+    while (index < len) {
+      int b;
+      int shift = 0;
+      int result = 0;
+      do {
+        b = encoded.codeUnitAt(index++) - 63;
+        result |= (b & 0x1F) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      int dlat = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
+      lat += dlat;
+
+      shift = 0;
+      result = 0;
+      do {
+        b = encoded.codeUnitAt(index++) - 63;
+        result |= (b & 0x1F) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      int dlng = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
+      lng += dlng;
+
+      double latitude = lat / 1E5;
+      double longitude = lng / 1E5;
+      points.add(LatLng(latitude, longitude));
+    }
+    return points;
+  }
+
+
 }
