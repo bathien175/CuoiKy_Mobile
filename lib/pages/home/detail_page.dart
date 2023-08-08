@@ -223,7 +223,8 @@ class _DetailPageState extends State<DetailPage> {
                                                           233,
                                                           36,
                                                           36) // Màu icon khi đang theo dõi (tuỳ chọn)
-                                                      : Colors.black,
+                                                      : const Color.fromARGB(
+                                                          255, 220, 215, 215),
                                                   // Màu icon khi chưa theo dõi (tuỳ chọn)
                                                 ),
                                               ),
@@ -632,8 +633,9 @@ class _DetailPageState extends State<DetailPage> {
                             'Book Now',
                           ),
                           onPressed: () {
-                            Navigator.of(context)
-                                .pushNamed(RouteGenerator.checkoutPage);
+                            Navigator.of(context).pushNamed(
+                              RouteGenerator.checkoutPage,
+                            );
                           }))
                 ],
               ),
