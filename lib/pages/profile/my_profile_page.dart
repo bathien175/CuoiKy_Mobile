@@ -2,7 +2,6 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:get/get.dart';
 import 'package:homelyn/components/c_elevated_button.dart';
 import 'package:homelyn/widgets/profile_badge.dart';
 import 'package:homelyn/models/current_user.dart';
@@ -33,14 +32,10 @@ class _MyProfilePageState extends State<MyProfilePage> {
   final TextEditingController _birthdayController =
   TextEditingController(text: CURRENT_USER_BIRTHDAY);
 
-  final TextEditingController _sexController =
-  TextEditingController(text: CURRENT_USER_SEX);
 
   final TextEditingController _addressController =
   TextEditingController(text: CURRENT_USER_ADDRESS);
 
-  final TextEditingController _cityController =
-  TextEditingController(text: CURRENT_USER_CITY);
 
   bool showPhoneField = false;
 

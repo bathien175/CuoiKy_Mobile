@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:homelyn/components/c_elevated_button.dart';
 import 'package:homelyn/config/constants.dart';
 import 'package:homelyn/models/current_save_booking.dart';
-import '../models/guest.dart';
 
 class RoomAndGuests extends StatefulWidget {
   const RoomAndGuests({super.key});

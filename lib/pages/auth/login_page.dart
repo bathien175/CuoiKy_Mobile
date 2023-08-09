@@ -375,17 +375,18 @@ class _LoginPageState extends State<LoginPage> {
               'address': '',
               'city': '',
             });
-            Fluttertoast.showToast(msg: "Tạo tài khoản thành công", toastLength: Toast.LENGTH_LONG, gravity: ToastGravity.BOTTOM, timeInSecForIosWeb: 1, textColor: Colors.black, fontSize: 16);
+
             // ignore: use_build_context_synchronously
-            fetchUserData();
-            // ignore: use_build_context_synchronously
-            Navigator.of(context).pushNamed(
-              RouteGenerator.navigationPage,
-            );
             CURRENT_USER_ID = userCredential.user!.uid;
             CURRENT_USER_NAME = displayName;
             CURRENT_USER_IMAGE = userCredential.user!.photoURL!;
             CURRENT_USER_EMAIL = email;
+            fetchUserData();
+            Fluttertoast.showToast(msg: "Tạo tài khoản thành công", toastLength: Toast.LENGTH_LONG, gravity: ToastGravity.BOTTOM, timeInSecForIosWeb: 1, textColor: Colors.black, fontSize: 16);
+            // ignore: use_build_context_synchronously
+            Navigator.of(context).pushNamed(
+              RouteGenerator.navigationPage,
+            );
           }
         }
       } else {

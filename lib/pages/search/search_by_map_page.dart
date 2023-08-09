@@ -23,7 +23,7 @@ class _SearchByMapPageState extends State<SearchByMapPage> {
   GoogleMapController? _mapController;
   LatLng _hotelLatLng = const LatLng(0, 0); // Tọa độ khách sạn
   String hotelAddress = "19C Bùi Thị Xuân, phường Bến Thành, Thành phố Hồ Chí Minh";
-   List<Polyline> _polyLines = [];
+   final List<Polyline> _polyLines = [];
   List<LatLng> routePoints = [];
   @override
   void initState() {
@@ -82,7 +82,7 @@ class _SearchByMapPageState extends State<SearchByMapPage> {
             onMapCreated: (controller) {
               setState(() {
                 _mapController = controller;
-                print(_mapController.toString());
+
               });
               _drawRoute(); // Draw the route when the map is ready
             },
@@ -235,19 +235,6 @@ class _SearchByMapPageState extends State<SearchByMapPage> {
     }
   }
 
-  Future<void> _drawRoute2() async {
-    google_directions.GoogleMapsDirections directionsApi = google_directions.GoogleMapsDirections(apiKey: 'AIzaSyAG3SSMXPUldPt4ogGe_lwZIFbqDF7KM6A');
-
-    google_directions.DirectionsResponse response = await directionsApi.directionsWithLocation(
-      google_directions.Location(lat: _currentLatLng.latitude, lng: _currentLatLng.longitude), // Điểm xuất phát
-      google_directions.Location(lat: _hotelLatLng.latitude, lng: _hotelLatLng.longitude), // Điểm đến
-    );
-
-    List<google_directions.Step> steps = response.routes[0].legs[0].steps;
-    for (var step in steps) {
-      routePoints.add(LatLng(step.startLocation.lat, step.startLocation.lng));
-    }
-  }
 
   List<LatLng> decodePolyline(String encoded) {
     List<LatLng> points = [];

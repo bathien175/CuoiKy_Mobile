@@ -515,6 +515,7 @@ class _ReviewsPageState extends State<ReviewsPage> {
             update = true;
             _rating = value['rating'].toDouble();
             _reviewController.text = value['review'];
+            _review = value['review'];
           });
         }
       }
@@ -542,12 +543,12 @@ class _ReviewsPageState extends State<ReviewsPage> {
           .child('hotels/$CURRENT_HOTEL_NAME');
 
       await reviewRef.update({
-        'hotel_rating': rating,
+        'hotel_rating': double.parse(rating.toStringAsFixed(2)),
         'count_rating': countReview
       });
 
       setState(() {
-        CURRENT_HOTEL_RATING = rating;
+        CURRENT_HOTEL_RATING = double.parse(rating.toStringAsFixed(2));
         CURRENT_HOTEL_COUNT_RATING = countReview;
       });
     }
