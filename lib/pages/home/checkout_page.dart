@@ -45,6 +45,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
     setState(() {
       // Cập nhật trạng thái của guests
       guestandRoom = GUEST_AND_ROOM;
+      updateTotalDate();
     });
   }
 
